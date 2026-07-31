@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kotaaans Barbershop — Rēzekne</title>
+<meta name="description" content="Kotaaans Barbershop — premium vīriešu frizūras un bārdas kopšana Rēzeknē. Dibinātājs Jānis Kotāns. Strādājam ar STMNT Grooming un Nishman.">
+<meta name="theme-color" content="#0a0a0a">
+
+<!-- ============ FONTI ============ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Anton&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   KOTAAANS BARBERSHOP — viss stils ir šeit.
+   Krāsas un vērtības vari mainīt :root sadaļā zemāk.
+   ========================================================= */
+
+:root{
+  --bg:        #0a0a0a;   /* fons */
+  --bg-soft:   #121212;   /* nedaudz gaišāks fons */
+  --ink:       #f4f1ea;   /* teksts (kauls/balts) */
+  --muted:     #8a8a86;   /* pelēks teksts */
+  --line:      #262626;   /* līnijas */
+  --accent:    #d92b3a;   /* sarkans akcents */
+  --gold:      #c9a227;   /* siltais akcents */
+  --max:       1200px;
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{ scroll-behavior:smooth; }
+
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Manrope', sans-serif;
+  font-weight:400;
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* graudains overlay tekstūrai */
+body::after{
+  content:"";
+  position:fixed; inset:0;
+  pointer-events:none;
+  z-index:9999;
+  opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.wrap{ width:90%; max-width:var(--max); margin:0 auto; }
+
+h1,h2,h3{ font-family:'Anton', sans-serif; font-weight:400; letter-spacing:.5px; line-height:.95; text-transform:uppercase; }
+
+a{ color:inherit; text-decoration:none; }
+a:focus-visible,
+button:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:4px;
+}
+
+/* ============ BĀRDDZIŅA STABS (animēta svītra) ============ */
+.pole{
+  height:6px;
+  width:100%;
+  background:repeating-linear-gradient(
+    -45deg,
+    var(--accent) 0 14px,
+    var(--ink) 14px 28px,
+    var(--bg) 28px 42px
+  );
+  background-size:200% 100%;
+  animation:pole 2.5s linear infinite;
+}
+@keyframes pole{ to{ background-position:-84px 0; } }
+
+/* ===================== NAV ===================== */
+header{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  transition:background .3s, border-color .3s;
+  border-bottom:1px solid transparent;
+}
+header.scrolled{
+  background:rgba(10,10,10,.85);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+nav{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:22px 0;
+}
+.brand{ font-family:'Anton',sans-serif; font-size:1.4rem; letter-spacing:1px; text-transform:uppercase; }
+.brand span{ color:var(--accent); }
+.nav-links{ display:flex; gap:34px; }
+.nav-links a{
+  font-size:.78rem; letter-spacing:2px; text-transform:uppercase;
+  color:var(--muted); transition:color .2s; position:relative;
+}
+.nav-links a:hover{ color:var(--ink); }
+.nav-links a::after{
+  content:""; position:absolute; left:0; bottom:-6px; height:1px; width:0;
+  background:var(--accent); transition:width .25s;
+}
+.nav-links a:hover::after{ width:100%; }
+
+.btn{
+  display:inline-block;
+  font-size:.78rem; letter-spacing:2px; text-transform:uppercase; font-weight:600;
+  padding:13px 26px; border:1px solid var(--ink);
+  transition:all .25s; cursor:pointer; background:transparent; color:var(--ink);
+}
+.btn:hover{ background:var(--ink); color:var(--bg); }
+.btn-accent{ border-color:var(--accent); background:var(--accent); }
+.btn-accent:hover{ background:transparent; color:var(--accent); }
+
+.burger{ display:none; flex-direction:column; gap:5px; cursor:pointer; }
+.burger{
+  background:none;
+  border:0;
+  padding:0;
+}
+.burger span{ width:26px; height:2px; background:var(--ink); transition:.3s; }
+
+/* ===================== HERO ===================== */
+.hero{
+  min-height:100vh; display:flex; align-items:center;
+  position:relative; overflow:hidden;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(217,43,58,.12), transparent 45%),
+    var(--bg);
+}
+/* lielais caurspīdīgais fona teksts */
+.hero-ghost{
+  position:absolute; right:-4%; bottom:-6%;
+  font-family:'Anton',sans-serif; text-transform:uppercase;
+  font-size:30vw; line-height:.8; color:#fff;
+  opacity:.03; white-space:nowrap; pointer-events:none; user-select:none;
+}
+.hero-inner{ position:relative; z-index:2; padding-top:90px; }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:.78rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted);
+  margin-bottom:26px;
+}
+.eyebrow::before{ content:""; width:42px; height:1px; background:var(--accent); }
+
+.hero h1{
+  font-size:clamp(3.5rem, 13vw, 12rem);
+  letter-spacing:-2px;
+}
+.hero h1 em{ color:var(--accent); font-style:normal; }
+.hero-sub{
+  max-width:540px; margin:26px 0 38px; font-size:1.1rem; color:var(--muted);
+}
+.hero-cta{ display:flex; gap:16px; flex-wrap:wrap; }
+
+.scroll-hint{
+  position:absolute; bottom:30px; left:50%; transform:translateX(-50%);
+  font-size:.7rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted);
+  display:flex; flex-direction:column; align-items:center; gap:10px; z-index:2;
+}
+.scroll-hint .dot{ width:1px; height:40px; background:var(--line); position:relative; overflow:hidden; }
+.scroll-hint .dot::after{
+  content:""; position:absolute; top:-40px; left:0; width:1px; height:40px;
+  background:var(--accent); animation:fall 1.8s ease-in-out infinite;
+}
+@keyframes fall{ to{ top:40px; } }
+
+/* ============ MARQUEE ============ */
+.marquee{
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  padding:24px 0; overflow:hidden; white-space:nowrap; background:var(--bg-soft);
+}
+.marquee div{ display:inline-block; animation:scroll 22s linear infinite; }
+.marquee span{
+  font-family:'Anton',sans-serif; text-transform:uppercase; font-size:1.6rem;
+  letter-spacing:2px; margin:0 28px; color:var(--ink);
+}
+.marquee span:nth-child(even){ color:transparent; -webkit-text-stroke:1px var(--muted); }
+@keyframes scroll{ to{ transform:translateX(-50%); } }
+
+/* ===================== SEKCIJAS ===================== */
+section{ padding:120px 0; }
+.sec-head{ margin-bottom:60px; }
+.sec-head .eyebrow{ margin-bottom:14px; }
+.sec-head h2{ font-size:clamp(2.4rem,6vw,5rem); }
+
+/* PAR / ABOUT */
+.about-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:70px; align-items:center; }
+.about-text p{ color:var(--muted); margin-bottom:18px; font-size:1.05rem; }
+.about-text .lead{ color:var(--ink); font-size:1.25rem; line-height:1.5; }
+.stats{ display:flex; gap:50px; margin-top:40px; }
+.stat .num{ font-family:'Anton',sans-serif; font-size:3rem; color:var(--accent); }
+.stat .lbl{ font-size:.75rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+.about-card{
+  border:1px solid var(--line); padding:46px 40px; background:var(--bg-soft);
+  position:relative;
+}
+.about-card h3{ font-size:2rem; margin-bottom:8px; }
+.about-card .who{ color:var(--muted); font-size:.85rem; letter-spacing:2px; text-transform:uppercase; margin-bottom:26px; }
+.about-card ul{ list-style:none; }
+.about-card li{ padding:14px 0; border-top:1px solid var(--line); display:flex; gap:14px; align-items:center; color:var(--ink); }
+.about-card li span{ color:var(--accent); }
+
+/* PAKALPOJUMI */
+#pakalpojumi{ background:var(--bg-soft); }
+.services{ display:grid; grid-template-columns:repeat(2,1fr); gap:0; border:1px solid var(--line); }
+.service{
+  padding:34px 36px; border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+  display:flex; justify-content:space-between; align-items:flex-start; gap:20px;
+  transition:background .25s; cursor:default;
+}
+.service:nth-child(2n){ border-right:none; }
+.service:hover{ background:var(--bg); }
+.service-info h3{ font-size:1.5rem; margin-bottom:6px; }
+.service-info p{ color:var(--muted); font-size:.9rem; }
+.service-price{ font-family:'Anton',sans-serif; font-size:1.8rem; color:var(--accent); white-space:nowrap; }
+
+/* GALERIJA */
+.gallery{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.gallery .tile{
+  aspect-ratio:3/4; background:var(--bg-soft); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;
+  font-family:'Anton',sans-serif; color:var(--line); font-size:3rem;
+  transition:transform .35s;
+}
+.gallery .tile:hover{ transform:scale(.98); }
+.gallery .tile::before{
+  content:""; position:absolute; inset:0;
+  background:repeating-linear-gradient(45deg, transparent 0 18px, rgba(255,255,255,.02) 18px 36px);
+}
+.gallery .tile.big{ grid-row:span 2; aspect-ratio:auto; }
+
+/* KONTAKTI / BOOKING */
+#kontakti{
+  text-align:center;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(217,43,58,.12), transparent 50%),
+    var(--bg);
+}
+#kontakti h2{ font-size:clamp(2.6rem,8vw,7rem); margin-bottom:20px; }
+#kontakti p{ color:var(--muted); max-width:520px; margin:0 auto 38px; font-size:1.1rem; }
+.contact-row{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
+.contact-meta{ margin-top:60px; display:flex; gap:50px; justify-content:center; flex-wrap:wrap; }
+.contact-meta div .lbl{ font-size:.72rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.contact-meta div .val{ font-size:1.05rem; }
+
+/* FOOTER */
+footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
+.foot{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; }
+.foot .brand{ font-size:1.6rem; }
+.foot small{ color:var(--muted); font-size:.8rem; }
+.socials{ display:flex; gap:24px; }
+.socials a{ font-size:.78rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); transition:color .2s; }
+.socials a:hover{ color:var(--accent); }
+
+/* ====== SCROLL REVEAL ====== */
+.reveal{ opacity:0; transform:translateY(30px); transition:opacity .7s ease, transform .7s ease; }
+.reveal.show{ opacity:1; transform:none; }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *, *::before, *::after{
+    animation:none !important;
+    transition:none !important;
+  }
+  .reveal{
+    opacity:1;
+    transform:none;
+  }
+}
+
+/* ===================== RESPONSĪVS ===================== */
+@media (max-width:880px){
+  .nav-links{
+    position:fixed; top:0; right:0; height:100vh; width:75%;
+    background:var(--bg-soft); flex-direction:column; justify-content:center;
+    gap:34px; padding:40px; transform:translateX(100%); transition:transform .35s;
+    border-left:1px solid var(--line); z-index:90;
+  }
+  .nav-links.open{ transform:none; }
+  .nav-links a{ font-size:1rem; }
+  .burger{ display:flex; z-index:100; }
+  nav .btn{ display:none; }
+  .about-grid{ grid-template-columns:1fr; gap:40px; }
+  .services{ grid-template-columns:1fr; }
+  .service{ border-right:none; }
+  .gallery{ grid-template-columns:repeat(2,1fr); }
+  .gallery .tile.big{ grid-row:auto; }
+  .stats{ gap:30px; }
+  section{ padding:90px 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="pole"></div>
+
+<!-- ============ NAVIGĀCIJA ============ -->
+<header id="header">
+  <div class="wrap">
+    <nav>
+      <a href="#" class="brand">KOTAAANS<span>.</span></a>
+      <div class="nav-links" id="navLinks">
+        <a href="#par">Par mums</a>
+        <a href="#pakalpojumi">Pakalpojumi</a>
+        <a href="#galerija">Galerija</a>
+        <a href="#kontakti">Kontakti</a>
+      </div>
+      <a href="https://wa.me/37124118068" class="btn btn-accent">Pieraksties</a>
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Atvērt izvēlni"><span></span><span></span><span></span></button>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-ghost">KOTAAANS</div>
+  <div class="wrap hero-inner">
+    <span class="eyebrow">Barbershop · Rēzekne, Latvija</span>
+    <h1>Tavs stils.<br>Mūsu <em>amats.</em></h1>
+    <p class="hero-sub">Precīzi griezumi, tīras līnijas un bārdas kopšana augstākajā līmenī. Vieta, kur katrs apmeklējums ir kā rituāls.</p>
+    <div class="hero-cta">
+      <a href="https://wa.me/37124118068" class="btn btn-accent">Pieraksties WhatsApp</a>
+      <a href="#pakalpojumi" class="btn">Skatīt pakalpojumus</a>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="dot"></div>Scroll</div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee">
+  <div>
+    <span>Fade</span><span>★</span><span>Bārda</span><span>★</span><span>STMNT Grooming</span><span>★</span><span>Klasika</span><span>★</span><span>Nishman</span><span>★</span>
+    <span>Fade</span><span>★</span><span>Bārda</span><span>★</span><span>STMNT Grooming</span><span>★</span><span>Klasika</span><span>★</span><span>Nishman</span><span>★</span>
+  </div>
+</div>
+
+<!-- ============ PAR MUMS ============ -->
+<section id="par">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <div class="sec-head"><span class="eyebrow">Stāsts</span><h2>Vairāk nekā<br>tikai griezums</h2></div>
+        <p class="lead">Kotaaans Barbershop ir vieta Rēzeknē, kur tradicionālais barbershop amats satiekas ar modernu stilu.</p>
+        <p>Dibinātājs Jānis Kotāns katram klientam pieiet individuāli — sākot ar konsultāciju un beidzot ar perfekti noslīpētu rezultātu. Šeit svarīga ir katra detaļa.</p>
+        <p>Mēs strādājam tikai ar profesionāliem produktiem, lai tavs griezums izskatās lieliski ne tikai krēslā, bet arī nākamajās nedēļās.</p>
+        <div class="stats">
+          <div class="stat"><div class="num">1158+</div><div class="lbl">Sekotāji</div></div>
+          <div class="stat"><div class="num">100%</div><div class="lbl">Precizitāte</div></div>
+          <div class="stat"><div class="num">2</div><div class="lbl">Premium zīmoli</div></div>
+        </div>
+      </div>
+      <div class="about-card reveal">
+        <h3>Jānis Kotāns</h3>
+        <div class="who">Dibinātājs & Barber</div>
+        <ul>
+          <li><span>✓</span> Strādājam ar STMNT Grooming</li>
+          <li><span>✓</span> Strādājam ar Nishman</li>
+          <li><span>✓</span> Vīriešu un bērnu griezumi</li>
+          <li><span>✓</span> Bārdas modelēšana un kopšana</li>
+          <li><span>✓</span> Pieraksts WhatsApp · 24118068</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAKALPOJUMI ============ -->
+<section id="pakalpojumi">
+  <div class="wrap">
+    <div class="sec-head reveal"><span class="eyebrow">Cenrādis</span><h2>Pakalpojumi</h2></div>
+    <!-- Cenas un nosaukumus ērti vari mainīt zemāk -->
+    <div class="services reveal">
+      <div class="service"><div class="service-info"><h3>Matu griezums</h3><p>Konsultācija, mazgāšana un stilizēšana</p></div><div class="service-price">€15</div></div>
+      <div class="service"><div class="service-info"><h3>Griezums + bārda</h3><p>Pilns komplekss vienā apmeklējumā</p></div><div class="service-price">€22</div></div>
+      <div class="service"><div class="service-info"><h3>Bārdas korekcija</h3><p>Modelēšana, eļļa un kopšana</p></div><div class="service-price">€10</div></div>
+      <div class="service"><div class="service-info"><h3>Skūšana ar tvaiku</h3><p>Karstais dvielis + bārdas nazis</p></div><div class="service-price">€15</div></div>
+      <div class="service"><div class="service-info"><h3>Bērnu griezums</h3><p>Līdz 12 gadu vecumam</p></div><div class="service-price">€12</div></div>
+      <div class="service"><div class="service-info"><h3>Pensionāru griezums</h3><p>Īpaša cena katru darba dienu</p></div><div class="service-price">€12</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALERIJA ============ -->
+<section id="galerija">
+  <div class="wrap">
+    <div class="sec-head reveal"><span class="eyebrow">Darbi</span><h2>Galerija</h2></div>
+    <!-- Ievieto savas bildes: nomaini tukšos blokus pret <img src="bilde.jpg"> -->
+    <div class="gallery reveal">
+      <div class="tile big">01</div>
+      <div class="tile">02</div>
+      <div class="tile">03</div>
+      <div class="tile">04</div>
+      <div class="tile big">05</div>
+      <div class="tile">06</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ KONTAKTI / BOOKING ============ -->
+<section id="kontakti">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow" style="justify-content:center;display:flex;">Pieraksts</span>
+      <h2>Gatavs jaunam<br>griezumam?</h2>
+      <p>Pieraksties caur WhatsApp un izvēlies sev ērtu laiku. Atbildam ātri.</p>
+      <div class="contact-row">
+        <a href="https://wa.me/37124118068" class="btn btn-accent">WhatsApp · 24118068</a>
+        <a href="https://instagram.com/kotaaans" class="btn">Instagram</a>
+      </div>
+      <div class="contact-meta">
+        <div><div class="lbl">Adrese</div><div class="val">Rēzekne, Latvija</div></div>
+        <div><div class="lbl">Telefons</div><div class="val">+371 24118068</div></div>
+        <div><div class="lbl">Pieraksts</div><div class="val">WhatsApp</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap foot">
+    <div>
+      <div class="brand">KOTAAANS<span style="color:var(--accent)">.</span> BARBERSHOP</div>
+      <small>© 2026 Kotaaans Barbershop · Rēzekne</small>
+    </div>
+    <div class="socials">
+      <a href="https://instagram.com/kotaaans">Instagram</a>
+      <a href="https://wa.me/37124118068">WhatsApp</a>
+    </div>
+  </div>
+</footer>
+
+<div class="pole"></div>
+
+<script>
+/* ====== NAV: fons pie scroll ====== */
+const header = document.getElementById('header');
+window.addEventListener('scroll', () => {
+  header.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+/* ====== Mobilā izvēlne ====== */
+const burger = document.getElementById('burger');
+const navLinks = document.getElementById('navLinks');
+burger.addEventListener('click', () => {
+  const isOpen = navLinks.classList.toggle('open');
+  burger.setAttribute('aria-expanded', String(isOpen));
+});
+navLinks.querySelectorAll('a').forEach(a =>
+  a.addEventListener('click', () => {
+    navLinks.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+  })
+);
+
+/* ====== Scroll reveal animācija ====== */
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('show');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+} else {
+  document.querySelectorAll('.reveal').forEach(el => el.classList.add('show'));
+}
+</script>
+</body>
+</html>
