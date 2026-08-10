@@ -4,7 +4,9 @@
   "description": "Static landing page for Kotaaans Barbershop",
   "scripts": {
     "dev": "http-server . -p 5173 -a 0.0.0.0 -c-1",
-    "start": "http-server . -p 5173 -a 0.0.0.0 -c-1"
+    "start": "http-server . -p 5173 -a 0.0.0.0 -c-1",
+    "migrate": "node scripts/migrate.js",
+    "set-webhook": "node scripts/set-webhook.js"
   },
   "keywords": [
     "barbershop",
@@ -13,6 +15,8 @@
   "author": "Kotaaans Barbershop",
   "license": "ISC",
   "dependencies": {
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "telegraf": "^4.16.3",
+    "pg": "^8.13.1"
   }
 }

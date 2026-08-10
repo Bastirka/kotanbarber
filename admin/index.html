@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kotāns — Pieraksti (admin)</title>
+<style>
+  :root{ --bg:#0a0a0a; --bg-soft:#121212; --ink:#f4f1ea; --muted:#8a8a86; --line:#262626; --accent:#d92b3a; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,Manrope,sans-serif; padding:24px; }
+  h1{ font-size:1.4rem; margin:0 0 20px; }
+  h2{ font-size:1.05rem; margin:0 0 12px; }
+  #gate{ max-width:340px; margin:80px auto; text-align:center; }
+  #gate input{ width:100%; padding:12px; margin:12px 0; background:var(--bg-soft); border:1px solid var(--line); color:var(--ink); border-radius:6px; }
+  #gate button, .row button, #addForm button{ background:var(--accent); color:#fff; border:0; padding:10px 16px; border-radius:6px; cursor:pointer; font-weight:600; }
+  #app{ display:none; max-width:720px; margin:0 auto; }
+  .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 16px; border:1px solid var(--line); border-radius:8px; margin-bottom:10px; background:var(--bg-soft); }
+  .row .when{ font-weight:700; }
+  .row .who{ color:var(--muted); font-size:.85rem; }
+  .row button{ background:transparent; border:1px solid var(--accent); color:var(--accent); }
+  .empty{ color:var(--muted); text-align:center; margin-top:40px; }
+  .card{ border:1px solid var(--line); border-radius:8px; background:var(--bg-soft); padding:18px; margin-bottom:26px; }
+  #addForm{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  #addForm input, #addForm select{ width:100%; padding:10px; background:var(--bg); border:1px solid var(--line); color:var(--ink); border-radius:6px; font-family:inherit; }
+  #addForm button{ grid-column:1 / -1; }
+  #addMsg{ grid-column:1 / -1; font-size:.85rem; color:var(--muted); }
+  #addMsg.error{ color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h1>Kotāns — admin</h1>
+  <input id="token" type="password" placeholder="Admin tokens">
+  <button onclick="login()">Ieiet</button>
+</div>
+
+<div id="app">
+  <h1>Kotāns — admin</h1>
+
+  <div class="card">
+    <h2>Pievienot esošu / manuālu pierakstu</h2>
+    <form id="addForm">
+      <select id="addService"></select>
+      <input id="addName" type="text" placeholder="Vārds" required>
+      <input id="addDate" type="date" required>
+      <input id="addTime" type="time" required>
+      <input id="addPhone" type="tel" placeholder="Telefons (nav obligāts)">
+      <button type="submit">Pievienot</button>
+      <div id="addMsg"></div>
+    </form>
+  </div>
+
+  <h2>Gaidāmie pieraksti</h2>
+  <div id="list"></div>
+</div>
+
+<script>
+let token = localStorage.getItem('kotan_admin_token') || '';
+let services = [];
+
+function login() {
+  token = document.getElementById('token').value.trim();
+  if (!token) return;
+  localStorage.setItem('kotan_admin_token', token);
+  boot();
+}
+
+async function boot() {
+  const res = await fetch('/api/admin/appointments?days=14', { headers: { 'X-Admin-Token': token } });
+  if (!res.ok) {
+    localStorage.removeItem('kotan_admin_token');
+    document.getElementById('gate').style.display = 'block';
+    document.getElementById('app').style.display = 'none';
+    return;
+  }
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  const { appointments } = await res.json();
+  render(appointments);
+  loadServices();
+}
+
+async function loadServices() {
+  if (services.length > 0) return;
+  const res = await fetch('/api/services');
+  const data = await res.json();
+  services = data.services;
+  const sel = document.getElementById('addService');
+  sel.innerHTML = services.map((s) => `<option value="${s.id}">${s.name} · ${s.durationMin} min</option>`).join('');
+}
+
+function render(list) {
+  const el = document.getElementById('list');
+  if (list.length === 0) {
+    el.innerHTML = '<div class="empty">Nav gaidāmu pierakstu.</div>';
+    return;
+  }
+  const fmt = (iso) => new Intl.DateTimeFormat('lv-LV', {
+    timeZone: 'Europe/Riga', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+  }).format(new Date(iso));
+  const srcLabel = { queue: 'rinda', scheduled: 'grafiks' };
+
+  el.innerHTML = list.map((a) => `
+    <div class="row">
+      <div>
+        <div class="when">${fmt(a.starts_at)} · ${a.service_name}</div>
+        <div class="who">${a.client_name}${a.telegram_username ? ' · @' + a.telegram_username : ''} · €${a.price_eur} · ${srcLabel[a.mode] || a.mode}</div>
+      </div>
+      <button onclick="cancelAppt(${a.id})">Atcelt</button>
+    </div>
+  `).join('');
+}
+
+async function cancelAppt(id) {
+  if (!confirm('Atcelt šo pierakstu?')) return;
+  await fetch('/api/admin/cancel', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+    body: JSON.stringify({ id }),
+  });
+  boot();
+}
+
+document.getElementById('addForm').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const msg = document.getElementById('addMsg');
+  msg.className = '';
+  msg.textContent = 'Pievieno…';
+
+  const serviceId = Number(document.getElementById('addService').value);
+  const clientName = document.getElementById('addName').value.trim();
+  const date = document.getElementById('addDate').value;
+  const time = document.getElementById('addTime').value;
+  const phone = document.getElementById('addPhone').value.trim();
+
+  if (!serviceId || !clientName || !date || !time) {
+    msg.className = 'error';
+    msg.textContent = 'Aizpildi pakalpojumu, vārdu, datumu un laiku.';
+    return;
+  }
+
+  // date+time are entered in the admin's own local time; the browser's
+  // Date parses them as local wall-clock, which is correct as long as the
+  // barber is in Rīga when using this panel.
+  const startsAt = new Date(`${date}T${time}:00`);
+
+  const res = await fetch('/api/admin/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+    body: JSON.stringify({ serviceId, clientName, phone: phone || undefined, startsAt: startsAt.toISOString() }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    msg.className = 'error';
+    msg.textContent = data.error || 'Neizdevās pievienot.';
+    return;
+  }
+  msg.textContent = 'Pievienots.';
+  document.getElementById('addForm').reset();
+  boot();
+});
+
+if (token) boot();
+else document.getElementById('gate').style.display = 'block';
+</script>
+</body>
+</html>

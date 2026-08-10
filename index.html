@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kotaaans Barbershop — Rēzekne</title>
-<meta name="description" content="Kotaaans Barbershop — premium vīriešu frizūras un bārdas kopšana Rēzeknē. Dibinātājs Jānis Kotāns. Strādājam ar STMNT Grooming un Nishman.">
+<title>Kotāns — Barbershop Rēzeknē</title>
+<meta name="description" content="Kotāns ir barbershop Rēzeknē ar tīru vizuālo rokrakstu, mierīgu attieksmi un skaidru pierakstu bez liekas runāšanas.">
 <meta name="theme-color" content="#0a0a0a">
 
 <!-- ============ FONTI ============ -->
@@ -43,6 +43,8 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
+body.is-loaded .intro{ opacity:0; visibility:hidden; }
+
 /* graudains overlay tekstūrai */
 body::after{
   content:"";
@@ -54,6 +56,31 @@ body::after{
 }
 
 .wrap{ width:90%; max-width:var(--max); margin:0 auto; }
+
+.intro{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(217,43,58,.18), transparent 35%),
+    #050505;
+  transition:opacity .8s ease, visibility .8s ease;
+}
+.intro-mark{
+  font-family:'Anton',sans-serif;
+  font-size:clamp(3rem, 10vw, 7rem);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  animation:introSpin 1.3s cubic-bezier(.2,.8,.2,1);
+}
+.intro-mark span{ color:var(--accent); display:inline-block; }
+@keyframes introSpin{
+  0%{ opacity:0; transform:scale(.78) rotate(-14deg); }
+  55%{ opacity:1; transform:scale(1.02) rotate(4deg); }
+  100%{ opacity:1; transform:scale(1) rotate(0); }
+}
 
 h1,h2,h3{ font-family:'Anton', sans-serif; font-weight:400; letter-spacing:.5px; line-height:.95; text-transform:uppercase; }
 
@@ -97,6 +124,9 @@ nav{
 .brand{ font-family:'Anton',sans-serif; font-size:1.4rem; letter-spacing:1px; text-transform:uppercase; }
 .brand span{ color:var(--accent); }
 .nav-links{ display:flex; gap:34px; }
+.nav-links a.btn{ display:none; color:var(--ink); }
+.nav-links a.btn:hover{ color:var(--accent); }
+.nav-links a.btn::after{ display:none; }
 .nav-links a{
   font-size:.78rem; letter-spacing:2px; text-transform:uppercase;
   color:var(--muted); transition:color .2s; position:relative;
@@ -115,7 +145,10 @@ nav{
   transition:all .25s; cursor:pointer; background:transparent; color:var(--ink);
 }
 .btn:hover{ background:var(--ink); color:var(--bg); }
-.btn-accent{ border-color:var(--accent); background:var(--accent); }
+.btn-accent{
+  border-color:var(--accent); background:var(--accent);
+  font-size:.9rem; padding:17px 34px; font-weight:700;
+}
 .btn-accent:hover{ background:transparent; color:var(--accent); }
 
 .burger{ display:none; flex-direction:column; gap:5px; cursor:pointer; }
@@ -134,6 +167,44 @@ nav{
     radial-gradient(circle at 80% 20%, rgba(217,43,58,.12), transparent 45%),
     var(--bg);
 }
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(115deg, rgba(255,255,255,.05), transparent 35%),
+    linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.65));
+  pointer-events:none;
+}
+.hero-media{
+  position:absolute;
+  inset:0;
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  opacity:.45;
+}
+.hero-panel{
+  border-left:1px solid rgba(255,255,255,.04);
+  background-size:cover;
+  background-position:center;
+  transform:scale(1.05);
+  animation:drift 18s ease-in-out infinite alternate;
+}
+.hero-panel:first-child{
+  background:
+    linear-gradient(180deg, rgba(8,8,8,.22), rgba(8,8,8,.82)),
+    url("https://images.unsplash.com/photo-1517832606299-7ae9b720a186?auto=format&fit=crop&w=1200&q=80");
+}
+.hero-panel:last-child{
+  background:
+    linear-gradient(180deg, rgba(8,8,8,.28), rgba(8,8,8,.86)),
+    url("https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80");
+  animation-duration:22s;
+}
+@keyframes drift{
+  from{ transform:scale(1.04) translate3d(0,0,0); }
+  to{ transform:scale(1.14) translate3d(-2%,2%,0); }
+}
 /* lielais caurspīdīgais fona teksts */
 .hero-ghost{
   position:absolute; right:-4%; bottom:-6%;
@@ -142,6 +213,20 @@ nav{
   opacity:.03; white-space:nowrap; pointer-events:none; user-select:none;
 }
 .hero-inner{ position:relative; z-index:2; padding-top:90px; }
+.hero-mark{
+  position:absolute;
+  right:3.5vw;
+  top:50%;
+  transform:translateY(-50%);
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  font-family:'Anton',sans-serif;
+  font-size:.95rem;
+  letter-spacing:.55em;
+  text-transform:uppercase;
+  color:rgba(244,241,234,.6);
+}
+.hero-mark span{ color:var(--accent); }
 .eyebrow{
   display:inline-flex; align-items:center; gap:10px;
   font-size:.78rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted);
@@ -154,35 +239,40 @@ nav{
   letter-spacing:-2px;
 }
 .hero h1 em{ color:var(--accent); font-style:normal; }
-.hero-sub{
-  max-width:540px; margin:26px 0 38px; font-size:1.1rem; color:var(--muted);
-}
-.hero-cta{ display:flex; gap:16px; flex-wrap:wrap; }
-
-.scroll-hint{
-  position:absolute; bottom:30px; left:50%; transform:translateX(-50%);
-  font-size:.7rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted);
-  display:flex; flex-direction:column; align-items:center; gap:10px; z-index:2;
-}
-.scroll-hint .dot{ width:1px; height:40px; background:var(--line); position:relative; overflow:hidden; }
-.scroll-hint .dot::after{
-  content:""; position:absolute; top:-40px; left:0; width:1px; height:40px;
-  background:var(--accent); animation:fall 1.8s ease-in-out infinite;
-}
-@keyframes fall{ to{ top:40px; } }
+.hero-cta{ display:flex; gap:16px; flex-wrap:wrap; margin-top:38px; }
 
 /* ============ MARQUEE ============ */
 .marquee{
-  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
-  padding:24px 0; overflow:hidden; white-space:nowrap; background:var(--bg-soft);
+  position:relative;
+  padding:24px 0; overflow:hidden; white-space:nowrap;
+  background:var(--bg);
 }
-.marquee div{ display:inline-block; animation:scroll 22s linear infinite; }
+.marquee::before,
+.marquee::after{
+  content:""; position:absolute; left:0; right:0; height:60px;
+  pointer-events:none;
+}
+.marquee::before{ top:0; background:linear-gradient(180deg, rgba(0,0,0,.25), transparent); }
+.marquee::after{ bottom:0; background:linear-gradient(0deg, rgba(0,0,0,.25), transparent); }
+.marquee-track{
+  display:flex;
+  width:max-content;
+  will-change:transform;
+  animation:marquee-scroll 26s linear infinite;
+}
+.marquee-group{
+  display:flex;
+  flex-shrink:0;
+}
 .marquee span{
   font-family:'Anton',sans-serif; text-transform:uppercase; font-size:1.6rem;
   letter-spacing:2px; margin:0 28px; color:var(--ink);
 }
 .marquee span:nth-child(even){ color:transparent; -webkit-text-stroke:1px var(--muted); }
-@keyframes scroll{ to{ transform:translateX(-50%); } }
+@keyframes marquee-scroll{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-50%); }
+}
 
 /* ===================== SEKCIJAS ===================== */
 section{ padding:120px 0; }
@@ -201,14 +291,30 @@ section{ padding:120px 0; }
   border:1px solid var(--line); padding:46px 40px; background:var(--bg-soft);
   position:relative;
 }
+.about-card::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:3px;
+  background:linear-gradient(180deg, var(--accent), transparent);
+}
 .about-card h3{ font-size:2rem; margin-bottom:8px; }
 .about-card .who{ color:var(--muted); font-size:.85rem; letter-spacing:2px; text-transform:uppercase; margin-bottom:26px; }
 .about-card ul{ list-style:none; }
 .about-card li{ padding:14px 0; border-top:1px solid var(--line); display:flex; gap:14px; align-items:center; color:var(--ink); }
 .about-card li span{ color:var(--accent); }
 
+.quote-strip{
+  margin-top:42px;
+  padding:18px 22px;
+  border:1px solid var(--line);
+  background:linear-gradient(90deg, rgba(217,43,58,.08), rgba(255,255,255,0));
+  font-size:.98rem;
+  color:var(--ink);
+}
+
 /* PAKALPOJUMI */
-#pakalpojumi{ background:var(--bg-soft); }
+#pakalpojumi{ background:var(--bg); }
 .services{ display:grid; grid-template-columns:repeat(2,1fr); gap:0; border:1px solid var(--line); }
 .service{
   padding:34px 36px; border-right:1px solid var(--line); border-bottom:1px solid var(--line);
@@ -235,6 +341,70 @@ section{ padding:120px 0; }
   background:repeating-linear-gradient(45deg, transparent 0 18px, rgba(255,255,255,.02) 18px 36px);
 }
 .gallery .tile.big{ grid-row:span 2; aspect-ratio:auto; }
+.gallery .tile::after{
+  content:attr(data-label);
+  position:absolute;
+  left:18px;
+  bottom:18px;
+  font-size:.72rem;
+  letter-spacing:2px;
+  color:var(--ink);
+}
+.tile-photo-1{ background:
+  linear-gradient(180deg, rgba(10,10,10,.16), rgba(10,10,10,.82)),
+  url("https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=900&q=80") center/cover; }
+.tile-photo-2{ background:
+  linear-gradient(180deg, rgba(10,10,10,.16), rgba(10,10,10,.84)),
+  url("https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=900&q=80") center/cover; }
+.tile-photo-3{ background:
+  linear-gradient(180deg, rgba(10,10,10,.22), rgba(10,10,10,.78)),
+  url("https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=900&q=80") center/cover; }
+.tile-photo-4{ background:
+  linear-gradient(180deg, rgba(10,10,10,.16), rgba(10,10,10,.8)),
+  url("https://images.unsplash.com/photo-1512690459411-b0fdacec10fd?auto=format&fit=crop&w=900&q=80") center/cover; }
+.tile-photo-5{ background:
+  linear-gradient(180deg, rgba(10,10,10,.18), rgba(10,10,10,.8)),
+  url("https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?auto=format&fit=crop&w=900&q=80") center/cover; }
+.tile-photo-6{ background:
+  linear-gradient(180deg, rgba(10,10,10,.18), rgba(10,10,10,.8)),
+  url("https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80") center/cover; }
+
+/* REZERVĒT / BOOKING WIDGET */
+#rezervet{ background:var(--bg); }
+.booking{
+  max-width:640px; margin:0 auto; border:1px solid var(--line);
+  background:var(--bg-soft); padding:40px;
+}
+.bk-services{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:22px; }
+.bk-service{
+  border:1px solid var(--line); padding:16px; cursor:pointer; text-align:left;
+  background:transparent; color:var(--ink); font-family:inherit; transition:border-color .2s;
+}
+.bk-service:hover{ border-color:var(--accent); }
+.bk-service.active{ border-color:var(--accent); background:rgba(217,43,58,.08); }
+.bk-service .nm{ font-weight:700; font-size:.95rem; }
+.bk-service .meta{ color:var(--muted); font-size:.8rem; margin-top:4px; }
+.bk-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+.bk-row .btn{ flex:1; min-width:180px; text-align:center; }
+.bk-field{
+  width:100%; padding:12px 14px; margin-bottom:12px; background:var(--bg);
+  border:1px solid var(--line); color:var(--ink); font-family:inherit; font-size:.95rem;
+}
+select.bk-field{ appearance:none; }
+.bk-slots{ display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 4px; }
+.bk-slot{
+  border:1px solid var(--line); padding:8px 14px; background:transparent; color:var(--ink);
+  cursor:pointer; font-family:inherit; font-size:.85rem;
+}
+.bk-slot:hover{ border-color:var(--accent); }
+.bk-slot.active{ border-color:var(--accent); color:var(--accent); }
+.bk-summary{ margin-bottom:20px; padding:14px 16px; border:1px solid var(--line); background:var(--bg); font-size:.95rem; }
+.bk-msg{ color:var(--muted); font-size:.88rem; margin-top:14px; }
+.bk-msg.error{ color:var(--accent); }
+.bk-back{ background:none; border:0; color:var(--muted); text-decoration:underline; cursor:pointer; font-size:.8rem; margin-bottom:18px; padding:0; font-family:inherit; }
+.bk-done{ text-align:center; padding:20px 0; }
+.bk-done h3{ font-size:1.6rem; margin-bottom:10px; }
+.bk-done p{ color:var(--muted); }
 
 /* KONTAKTI / BOOKING */
 #kontakti{
@@ -285,8 +455,9 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
   }
   .nav-links.open{ transform:none; }
   .nav-links a{ font-size:1rem; }
+  .nav-links a.btn{ display:inline-block; margin-top:10px; }
   .burger{ display:flex; z-index:100; }
-  nav .btn{ display:none; }
+  nav > .btn{ display:none; }
   .about-grid{ grid-template-columns:1fr; gap:40px; }
   .services{ grid-template-columns:1fr; }
   .service{ border-right:none; }
@@ -294,10 +465,18 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
   .gallery .tile.big{ grid-row:auto; }
   .stats{ gap:30px; }
   section{ padding:90px 0; }
+  .hero-media{ grid-template-columns:1fr; }
+  .hero-panel:last-child,
+  .hero-mark,
+  .hero-ghost{ display:none; }
 }
 </style>
 </head>
 <body>
+
+<div class="intro" aria-hidden="true">
+  <div class="intro-mark">KOT<span>AAA</span>NS</div>
+</div>
 
 <div class="pole"></div>
 
@@ -311,8 +490,9 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
         <a href="#pakalpojumi">Pakalpojumi</a>
         <a href="#galerija">Galerija</a>
         <a href="#kontakti">Kontakti</a>
+        <a href="#rezervet" class="btn btn-accent">Rezervēt laiku</a>
       </div>
-      <a href="https://wa.me/37124118068" class="btn btn-accent">Pieraksties</a>
+      <a href="#rezervet" class="btn btn-accent">Pieraksties</a>
       <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Atvērt izvēlni"><span></span><span></span><span></span></button>
     </nav>
   </div>
@@ -320,24 +500,31 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
 
 <!-- ============ HERO ============ -->
 <section class="hero">
+  <div class="hero-media" aria-hidden="true">
+    <div class="hero-panel"></div>
+    <div class="hero-panel"></div>
+  </div>
   <div class="hero-ghost">KOTAAANS</div>
+  <div class="hero-mark">KOT<span>A</span>NS</div>
   <div class="wrap hero-inner">
     <span class="eyebrow">Barbershop · Rēzekne, Latvija</span>
-    <h1>Tavs stils.<br>Mūsu <em>amats.</em></h1>
-    <p class="hero-sub">Precīzi griezumi, tīras līnijas un bārdas kopšana augstākajā līmenī. Vieta, kur katrs apmeklējums ir kā rituāls.</p>
+    <h1>Kotāns.</h1>
     <div class="hero-cta">
-      <a href="https://wa.me/37124118068" class="btn btn-accent">Pieraksties WhatsApp</a>
-      <a href="#pakalpojumi" class="btn">Skatīt pakalpojumus</a>
+      <a href="#rezervet" class="btn btn-accent">Pieraksties</a>
+      <a href="#pakalpojumi" class="btn">Pakalpojumi un cenas</a>
     </div>
   </div>
-  <div class="scroll-hint"><div class="dot"></div>Scroll</div>
 </section>
 
 <!-- ============ MARQUEE ============ -->
 <div class="marquee">
-  <div>
-    <span>Fade</span><span>★</span><span>Bārda</span><span>★</span><span>STMNT Grooming</span><span>★</span><span>Klasika</span><span>★</span><span>Nishman</span><span>★</span>
-    <span>Fade</span><span>★</span><span>Bārda</span><span>★</span><span>STMNT Grooming</span><span>★</span><span>Klasika</span><span>★</span><span>Nishman</span><span>★</span>
+  <div class="marquee-track">
+    <div class="marquee-group" aria-hidden="true">
+      <span>Fade</span><span>★</span><span>Bārda</span><span>★</span><span>STMNT Grooming</span><span>★</span><span>Klasika</span><span>★</span><span>Nishman</span><span>★</span>
+    </div>
+    <div class="marquee-group" aria-hidden="true">
+      <span>Fade</span><span>★</span><span>Bārda</span><span>★</span><span>STMNT Grooming</span><span>★</span><span>Klasika</span><span>★</span><span>Nishman</span><span>★</span>
+    </div>
   </div>
 </div>
 
@@ -346,25 +533,25 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
   <div class="wrap">
     <div class="about-grid">
       <div class="about-text reveal">
-        <div class="sec-head"><span class="eyebrow">Stāsts</span><h2>Vairāk nekā<br>tikai griezums</h2></div>
-        <p class="lead">Kotaaans Barbershop ir vieta Rēzeknē, kur tradicionālais barbershop amats satiekas ar modernu stilu.</p>
-        <p>Dibinātājs Jānis Kotāns katram klientam pieiet individuāli — sākot ar konsultāciju un beidzot ar perfekti noslīpētu rezultātu. Šeit svarīga ir katra detaļa.</p>
-        <p>Mēs strādājam tikai ar profesionāliem produktiem, lai tavs griezums izskatās lieliski ne tikai krēslā, bet arī nākamajās nedēļās.</p>
+        <div class="sec-head"><span class="eyebrow">Stāsts</span><h2>Vieta, kur<br>atgriezties</h2></div>
+        <p class="lead">Kotāns nav stāsts par to, cik skaļi sevi pasniegt. Tas ir par vietu, kur ieiet, apsēsties krēslā un zināt, ka viss būs izdarīts kā vajag.</p>
+        <p>Mums svarīgāka par lozungiem ir sajūta telpā, attieksme pret cilvēku un tas, lai pēc apmeklējuma nav jāskaidro, kāpēc šeit bija vērts nākt.</p>
+        <p>Šo vietu tur komanda. Brāļi, rokraksts, savstarpēja uzticība un ikdienas darbs, kas nav jāapkar ar lieliem vārdiem.</p>
         <div class="stats">
-          <div class="stat"><div class="num">1158+</div><div class="lbl">Sekotāji</div></div>
-          <div class="stat"><div class="num">100%</div><div class="lbl">Precizitāte</div></div>
-          <div class="stat"><div class="num">2</div><div class="lbl">Premium zīmoli</div></div>
+          <div class="stat"><div class="num">2</div><div class="lbl">Brāļi komandā</div></div>
+          <div class="stat"><div class="num">1</div><div class="lbl">Adrese Rēzeknē</div></div>
+          <div class="stat"><div class="num">0</div><div class="lbl">Lieku saukļu</div></div>
         </div>
       </div>
       <div class="about-card reveal">
-        <h3>Jānis Kotāns</h3>
-        <div class="who">Dibinātājs & Barber</div>
+        <h3>Kotāns ikdienā</h3>
+        <div class="who">Kas šeit cilvēkiem ir svarīgi</div>
         <ul>
-          <li><span>✓</span> Strādājam ar STMNT Grooming</li>
-          <li><span>✓</span> Strādājam ar Nishman</li>
-          <li><span>✓</span> Vīriešu un bērnu griezumi</li>
-          <li><span>✓</span> Bārdas modelēšana un kopšana</li>
-          <li><span>✓</span> Pieraksts WhatsApp · 24118068</li>
+          <li><span>✓</span> Skaidrs pieraksts bez liekas čakarēšanās</li>
+          <li><span>✓</span> Griezumi, bārda un normāla attieksme</li>
+          <li><span>✓</span> Profesionāli produkti, ko tiešām lietojam</li>
+          <li><span>✓</span> Vieta, kur jūtams zīmols, nevis tikai interjers</li>
+          <li><span>✓</span> Pieraksts lapā vai Telegram botā</li>
         </ul>
       </div>
     </div>
@@ -375,14 +562,13 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
 <section id="pakalpojumi">
   <div class="wrap">
     <div class="sec-head reveal"><span class="eyebrow">Cenrādis</span><h2>Pakalpojumi</h2></div>
-    <!-- Cenas un nosaukumus ērti vari mainīt zemāk -->
     <div class="services reveal">
-      <div class="service"><div class="service-info"><h3>Matu griezums</h3><p>Konsultācija, mazgāšana un stilizēšana</p></div><div class="service-price">€15</div></div>
-      <div class="service"><div class="service-info"><h3>Griezums + bārda</h3><p>Pilns komplekss vienā apmeklējumā</p></div><div class="service-price">€22</div></div>
-      <div class="service"><div class="service-info"><h3>Bārdas korekcija</h3><p>Modelēšana, eļļa un kopšana</p></div><div class="service-price">€10</div></div>
-      <div class="service"><div class="service-info"><h3>Skūšana ar tvaiku</h3><p>Karstais dvielis + bārdas nazis</p></div><div class="service-price">€15</div></div>
-      <div class="service"><div class="service-info"><h3>Bērnu griezums</h3><p>Līdz 12 gadu vecumam</p></div><div class="service-price">€12</div></div>
-      <div class="service"><div class="service-info"><h3>Pensionāru griezums</h3><p>Īpaša cena katru darba dienu</p></div><div class="service-price">€12</div></div>
+      <div class="service"><div class="service-info"><h3>Matu griezums</h3><p>Tīrs rezultāts, stilizēšana un īss saskaņojums uz vietas</p></div><div class="service-price">€15</div></div>
+      <div class="service"><div class="service-info"><h3>Griezums + bārda</h3><p>Vienā reizē sakārto visu bez steigas un bez lieka trokšņa</p></div><div class="service-price">€22</div></div>
+      <div class="service"><div class="service-info"><h3>Bārdas korekcija</h3><p>Kontūra, forma un kopšana ikdienai</p></div><div class="service-price">€10</div></div>
+      <div class="service"><div class="service-info"><h3>Skūšana ar tvaiku</h3><p>Klasisks process ar mierīgāku tempu</p></div><div class="service-price">€15</div></div>
+      <div class="service"><div class="service-info"><h3>Bērnu griezums</h3><p>Vienkārši, saprotami un bez stresa</p></div><div class="service-price">€12</div></div>
+      <div class="service"><div class="service-info"><h3>Pensionāru griezums</h3><p>Ikdienas variants tiem, kam patīk skaidrība</p></div><div class="service-price">€12</div></div>
     </div>
   </div>
 </section>
@@ -391,33 +577,77 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
 <section id="galerija">
   <div class="wrap">
     <div class="sec-head reveal"><span class="eyebrow">Darbi</span><h2>Galerija</h2></div>
-    <!-- Ievieto savas bildes: nomaini tukšos blokus pret <img src="bilde.jpg"> -->
     <div class="gallery reveal">
-      <div class="tile big">01</div>
-      <div class="tile">02</div>
-      <div class="tile">03</div>
-      <div class="tile">04</div>
-      <div class="tile big">05</div>
-      <div class="tile">06</div>
+      <div class="tile big tile-photo-1" data-label="Telpas sajūta"></div>
+      <div class="tile tile-photo-2" data-label="Fade"></div>
+      <div class="tile tile-photo-3" data-label="Bārda"></div>
+      <div class="tile tile-photo-4" data-label="Krēsls"></div>
+      <div class="tile big tile-photo-5" data-label="Rokraksts"></div>
+      <div class="tile tile-photo-6" data-label="Ikdiena"></div>
     </div>
   </div>
 </section>
 
-<!-- ============ KONTAKTI / BOOKING ============ -->
+<!-- ============ REZERVĒT / BOOKING WIDGET ============ -->
+<section id="rezervet">
+  <div class="wrap">
+    <div class="sec-head reveal"><span class="eyebrow">Pieraksts</span><h2>Rezervē savu laiku</h2></div>
+    <div class="booking reveal" id="booking">
+
+      <div class="bk-step" data-step="service">
+        <div class="bk-services" id="bkServices">
+          <div class="bk-msg">Ielādē pakalpojumus…</div>
+        </div>
+      </div>
+
+      <div class="bk-step" data-step="mode" hidden>
+        <button type="button" class="bk-back" data-back="service">← Cits pakalpojums</button>
+        <div class="bk-row">
+          <button type="button" class="btn btn-accent" id="bkModeQueue">Tuvākais brīvais laiks</button>
+          <button type="button" class="btn" id="bkModePick">Izvēlēties laiku pats</button>
+        </div>
+      </div>
+
+      <div class="bk-step" data-step="pick" hidden>
+        <button type="button" class="bk-back" data-back="mode">← Atpakaļ</button>
+        <select class="bk-field" id="bkDate"></select>
+        <div class="bk-slots" id="bkSlots"></div>
+      </div>
+
+      <div class="bk-step" data-step="details" hidden>
+        <button type="button" class="bk-back" data-back="mode">← Atpakaļ</button>
+        <div class="bk-summary" id="bkSummary"></div>
+        <form id="bkForm">
+          <input class="bk-field" type="text" id="bkName" placeholder="Vārds" required maxlength="100">
+          <input class="bk-field" type="tel" id="bkPhone" placeholder="Telefona numurs" required maxlength="30">
+          <button type="submit" class="btn btn-accent">Apstiprināt pierakstu</button>
+        </form>
+      </div>
+
+      <div class="bk-step" data-step="done" hidden>
+        <div class="bk-done" id="bkDone"></div>
+      </div>
+
+      <div class="bk-msg error" id="bkError" hidden></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ KONTAKTI ============ -->
 <section id="kontakti">
   <div class="wrap">
     <div class="reveal">
-      <span class="eyebrow" style="justify-content:center;display:flex;">Pieraksts</span>
-      <h2>Gatavs jaunam<br>griezumam?</h2>
-      <p>Pieraksties caur WhatsApp un izvēlies sev ērtu laiku. Atbildam ātri.</p>
+      <span class="eyebrow" style="justify-content:center;display:flex;">Kontakti</span>
+      <h2>Ja gribi, lai ir<br>normāli izdarīts</h2>
+      <p>Rezervē laiku šeit lapā, vai pieraksties tieši Telegram botā.</p>
       <div class="contact-row">
-        <a href="https://wa.me/37124118068" class="btn btn-accent">WhatsApp · 24118068</a>
+        <a href="#rezervet" class="btn btn-accent">Rezervēt laiku</a>
         <a href="https://instagram.com/kotaaans" class="btn">Instagram</a>
       </div>
       <div class="contact-meta">
         <div><div class="lbl">Adrese</div><div class="val">Rēzekne, Latvija</div></div>
         <div><div class="lbl">Telefons</div><div class="val">+371 24118068</div></div>
-        <div><div class="lbl">Pieraksts</div><div class="val">WhatsApp</div></div>
+        <div><div class="lbl">Pieraksts</div><div class="val">Šeit lapā vai Telegram botā</div></div>
       </div>
     </div>
   </div>
@@ -427,12 +657,11 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
 <footer>
   <div class="wrap foot">
     <div>
-      <div class="brand">KOTAAANS<span style="color:var(--accent)">.</span> BARBERSHOP</div>
-      <small>© 2026 Kotaaans Barbershop · Rēzekne</small>
+      <div class="brand">KOTANS<span style="color:var(--accent)">.</span></div>
+      <small>© 2026 Kotāns · Rēzekne</small>
     </div>
     <div class="socials">
       <a href="https://instagram.com/kotaaans">Instagram</a>
-      <a href="https://wa.me/37124118068">WhatsApp</a>
     </div>
   </div>
 </footer>
@@ -440,6 +669,10 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
 <div class="pole"></div>
 
 <script>
+window.addEventListener('load', () => {
+  window.setTimeout(() => document.body.classList.add('is-loaded'), 550);
+});
+
 /* ====== NAV: fons pie scroll ====== */
 const header = document.getElementById('header');
 window.addEventListener('scroll', () => {
@@ -474,6 +707,208 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 } else {
   document.querySelectorAll('.reveal').forEach(el => el.classList.add('show'));
 }
+
+/* ====== REZERVĒŠANAS WIDGET ====== */
+(() => {
+  // Used only if /api/services can't be reached (e.g. static preview with no backend).
+  const FALLBACK_SERVICES = [
+    { id: 1, name: 'Matu griezums', durationMin: 30, priceEur: 15 },
+    { id: 2, name: 'Griezums + bārda', durationMin: 45, priceEur: 22 },
+    { id: 3, name: 'Bārdas korekcija', durationMin: 20, priceEur: 10 },
+    { id: 4, name: 'Skūšana ar tvaiku', durationMin: 30, priceEur: 15 },
+    { id: 5, name: 'Bērnu griezums', durationMin: 25, priceEur: 12 },
+    { id: 6, name: 'Pensionāru griezums', durationMin: 25, priceEur: 12 },
+  ];
+
+  const root = document.getElementById('booking');
+  if (!root) return;
+
+  const els = {
+    services: document.getElementById('bkServices'),
+    modeQueue: document.getElementById('bkModeQueue'),
+    modePick: document.getElementById('bkModePick'),
+    date: document.getElementById('bkDate'),
+    slots: document.getElementById('bkSlots'),
+    summary: document.getElementById('bkSummary'),
+    form: document.getElementById('bkForm'),
+    name: document.getElementById('bkName'),
+    phone: document.getElementById('bkPhone'),
+    done: document.getElementById('bkDone'),
+    error: document.getElementById('bkError'),
+  };
+
+  const state = { services: [], service: null, mode: null, startsAtIso: null };
+
+  function showStep(name) {
+    root.querySelectorAll('.bk-step').forEach((el) => {
+      el.hidden = el.dataset.step !== name;
+    });
+    els.error.hidden = true;
+  }
+
+  function showError(msg) {
+    els.error.textContent = msg;
+    els.error.hidden = false;
+  }
+
+  function addDaysStr(dateStr, n) {
+    const d = new Date(`${dateStr}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function fmtDayLabel(dateStr) {
+    const noon = new Date(`${dateStr}T12:00:00Z`);
+    return new Intl.DateTimeFormat('lv-LV', { timeZone: 'Europe/Riga', weekday: 'short', day: '2-digit', month: '2-digit' }).format(noon);
+  }
+  function fmtTime(iso) {
+    return new Intl.DateTimeFormat('lv-LV', { timeZone: 'Europe/Riga', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+  }
+  function fmtDayTime(iso) {
+    return new Intl.DateTimeFormat('lv-LV', { timeZone: 'Europe/Riga', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+  }
+
+  async function loadServices() {
+    try {
+      const res = await fetch('/api/services');
+      if (!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      state.services = data.services;
+    } catch {
+      state.services = FALLBACK_SERVICES;
+    }
+    renderServices();
+  }
+
+  function renderServices() {
+    els.services.innerHTML = '';
+    state.services.forEach((s) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'bk-service';
+      btn.innerHTML = `<div class="nm">${s.name}</div><div class="meta">€${s.priceEur} · ${s.durationMin} min</div>`;
+      btn.addEventListener('click', () => selectService(s, btn));
+      els.services.appendChild(btn);
+    });
+  }
+
+  function selectService(s, btn) {
+    state.service = s;
+    els.services.querySelectorAll('.bk-service').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    showStep('mode');
+  }
+
+  async function chooseQueue() {
+    state.mode = 'queue';
+    els.modeQueue.disabled = true;
+    els.modeQueue.textContent = 'Meklē…';
+    try {
+      const res = await fetch(`/api/availability?serviceId=${state.service.id}&mode=queue`);
+      const data = await res.json();
+      if (!res.ok || !data.slot) throw new Error('no slot');
+      state.startsAtIso = data.slot;
+      els.summary.textContent = `${state.service.name} · €${state.service.priceEur} · ${fmtDayTime(data.slot)}`;
+      showStep('details');
+    } catch {
+      showError('Rezervāciju sistēma īslaicīgi nav pieejama. Pamēģini vēlreiz vai zvani +371 24118068.');
+    } finally {
+      els.modeQueue.disabled = false;
+      els.modeQueue.textContent = 'Tuvākais brīvais laiks';
+    }
+  }
+
+  function choosePick() {
+    state.mode = 'scheduled';
+    els.date.innerHTML = '';
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Riga' }).format(new Date());
+    for (let i = 0; i < 14; i += 1) {
+      const dateStr = addDaysStr(today, i);
+      const opt = document.createElement('option');
+      opt.value = dateStr;
+      opt.textContent = fmtDayLabel(dateStr);
+      els.date.appendChild(opt);
+    }
+    showStep('pick');
+    loadSlots(els.date.value);
+  }
+
+  async function loadSlots(dateStr) {
+    els.slots.innerHTML = '<div class="bk-msg">Ielādē brīvos laikus…</div>';
+    try {
+      const res = await fetch(`/api/availability?serviceId=${state.service.id}&date=${dateStr}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error('bad response');
+      if (data.slots.length === 0) {
+        els.slots.innerHTML = '<div class="bk-msg">Šai dienai brīvu laiku nav.</div>';
+        return;
+      }
+      els.slots.innerHTML = '';
+      data.slots.forEach((iso) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'bk-slot';
+        btn.textContent = fmtTime(iso);
+        btn.addEventListener('click', () => {
+          state.startsAtIso = iso;
+          els.summary.textContent = `${state.service.name} · €${state.service.priceEur} · ${fmtDayTime(iso)}`;
+          showStep('details');
+        });
+        els.slots.appendChild(btn);
+      });
+    } catch {
+      showError('Rezervāciju sistēma īslaicīgi nav pieejama. Pamēģini vēlreiz vai zvani +371 24118068.');
+    }
+  }
+
+  async function submitBooking(ev) {
+    ev.preventDefault();
+    const submitBtn = els.form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sūta…';
+    try {
+      const res = await fetch('/api/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serviceId: state.service.id,
+          mode: state.mode,
+          startsAt: state.mode === 'scheduled' ? state.startsAtIso : undefined,
+          name: els.name.value,
+          phone: els.phone.value,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 409) {
+          showError('Diemžēl šo laiku tikko paņēma kāds cits. Izvēlies citu laiku.');
+          showStep(state.mode === 'queue' ? 'mode' : 'pick');
+          if (state.mode === 'scheduled') loadSlots(els.date.value);
+        } else {
+          showError(data.error || 'Neizdevās izveidot pierakstu. Pamēģini vēlreiz vai zvani +371 24118068.');
+        }
+        return;
+      }
+      els.done.innerHTML = `<h3>Pierakstīts.</h3><p>${data.appointment.serviceName} · €${data.appointment.priceEur}<br>${fmtDayTime(data.appointment.startsAt)}</p><p>Gaidīsim tevi Kotānā, Rēzeknē.</p>`;
+      showStep('done');
+    } catch {
+      showError('Rezervāciju sistēma īslaicīgi nav pieejama. Pamēģini vēlreiz vai zvani +371 24118068.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Apstiprināt pierakstu';
+    }
+  }
+
+  els.modeQueue.addEventListener('click', chooseQueue);
+  els.modePick.addEventListener('click', choosePick);
+  els.date.addEventListener('change', () => loadSlots(els.date.value));
+  els.form.addEventListener('submit', submitBooking);
+  root.querySelectorAll('.bk-back').forEach((btn) => {
+    btn.addEventListener('click', () => showStep(btn.dataset.back));
+  });
+
+  loadServices();
+})();
 </script>
 </body>
 </html>
