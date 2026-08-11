@@ -43,6 +43,19 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
+/* Viens vienots fons visai lapai — fiksēts pret skata logu, tāpēc
+   sadaļu robežas nekad nerada redzamu šuvi krāsu pārejā. */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(217,43,58,.14), transparent 42%),
+    radial-gradient(circle at 88% 78%, rgba(217,43,58,.10), transparent 46%);
+}
+
 body.is-loaded .intro{ opacity:0; visibility:hidden; }
 
 /* graudains overlay tekstūrai */
@@ -163,9 +176,6 @@ nav{
 .hero{
   min-height:100vh; display:flex; align-items:center;
   position:relative; overflow:hidden;
-  background:
-    radial-gradient(circle at 80% 20%, rgba(217,43,58,.12), transparent 45%),
-    var(--bg);
 }
 .hero::before{
   content:"";
@@ -245,7 +255,6 @@ nav{
 .marquee{
   position:relative;
   padding:24px 0; overflow:hidden; white-space:nowrap;
-  background:var(--bg);
 }
 .marquee::before,
 .marquee::after{
@@ -314,7 +323,6 @@ section{ padding:120px 0; }
 }
 
 /* PAKALPOJUMI */
-#pakalpojumi{ background:var(--bg); }
 .services{ display:grid; grid-template-columns:repeat(2,1fr); gap:0; border:1px solid var(--line); }
 .service{
   padding:34px 36px; border-right:1px solid var(--line); border-bottom:1px solid var(--line);
@@ -370,7 +378,6 @@ section{ padding:120px 0; }
   url("https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80") center/cover; }
 
 /* REZERVĒT / BOOKING WIDGET */
-#rezervet{ background:var(--bg); }
 .booking{
   max-width:640px; margin:0 auto; border:1px solid var(--line);
   background:var(--bg-soft); padding:40px;
@@ -409,9 +416,6 @@ select.bk-field{ appearance:none; }
 /* KONTAKTI / BOOKING */
 #kontakti{
   text-align:center;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(217,43,58,.12), transparent 50%),
-    var(--bg);
 }
 #kontakti h2{ font-size:clamp(2.6rem,8vw,7rem); margin-bottom:20px; }
 #kontakti p{ color:var(--muted); max-width:520px; margin:0 auto 38px; font-size:1.1rem; }
