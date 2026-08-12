@@ -98,13 +98,46 @@
   .price-inp{ width:70px; padding:5px 8px; border:1.5px solid var(--line); border-radius:5px; font-size:.88rem; text-align:center; }
   .dur-inp{ width:60px; padding:5px 8px; border:1.5px solid var(--line); border-radius:5px; font-size:.88rem; text-align:center; }
 
-  @media(max-width:560px){
+  /* SERVICE CARD (mobile alternative to table) */
+  .svc-card{ background:var(--white); border-radius:var(--r); padding:14px 16px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  .svc-card-name{ font-weight:700; font-size:.95rem; margin-bottom:10px; }
+  .svc-card-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .svc-card-field{ display:flex; flex-direction:column; gap:4px; flex:1; min-width:80px; }
+  .svc-card-field .lbl{ margin-bottom:0; }
+  .svc-card-btns{ display:flex; gap:8px; margin-top:10px; }
+  .svc-card-btns button{ flex:1; padding:10px; font-size:.85rem; }
+
+  @media(max-width:600px){
+    .main{ padding:14px 12px 80px; }
     .form-grid{ grid-template-columns:1fr; }
     .form-grid .span2{ grid-column:1; }
-    .appt-card{ gap:8px; }
-    .tbl{ font-size:.8rem; }
-    .tabs{ gap:0; }
-    .tab{ padding:12px 10px; font-size:.8rem; }
+    .tabs{ padding:0 6px; }
+    .tab{ padding:13px 8px; font-size:.78rem; }
+
+    /* Appointment card — top row: time+info, bottom row: actions */
+    .appt-card{ display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; gap:10px; padding:14px; align-items:start; }
+    .appt-time{ grid-column:1; grid-row:1; }
+    .appt-info{ grid-column:2; grid-row:1; min-width:0; }
+    .appt-actions{ grid-column:1/-1; grid-row:2; display:flex; flex-direction:column; gap:8px; }
+    .barber-select{ width:100%; padding:12px 10px; font-size:16px; border-radius:8px; }
+    .btn-cancel-full{ width:100%; padding:12px; font-size:.88rem; }
+
+    /* Services — hide table, show cards */
+    .tbl-wrap{ display:none; }
+    .svc-cards{ display:block; }
+
+    /* Touch targets */
+    .btn-sm{ padding:10px 14px; font-size:.85rem; min-height:44px; }
+    .add-toggle{ padding:10px 16px; min-height:44px; }
+
+    /* iOS zoom fix — 16px on all inputs */
+    .inp, select.inp{ font-size:16px !important; }
+    .price-inp, .dur-inp{ font-size:16px; }
+  }
+
+  @media(min-width:601px){
+    .svc-cards{ display:none; }
+    .tbl-wrap{ display:block; }
   }
 </style>
 </head>
@@ -240,12 +273,13 @@
           </div>
         </div>
       </div>
-      <div class="card">
+      <div class="card tbl-wrap">
         <table class="tbl">
           <thead><tr><th>Pakalpojums</th><th>Cena (€)</th><th>Ilgums (min)</th><th></th></tr></thead>
           <tbody id="servicesTbody"></tbody>
         </table>
       </div>
+      <div class="svc-cards" id="svcCards"></div>
     </div>
 
     <!-- ── CENU IESTATĪJUMI ── -->
@@ -365,10 +399,10 @@ function renderAppts(list) {
       </div>
       <div class="appt-actions">
         <select class="barber-select" onchange="assignBarberTo(${a.id}, this.value)">
-          <option value="">Piešķirt…</option>
+          <option value="">Piešķirt meistaram…</option>
           ${barberOptions}
         </select>
-        <button class="btn-sm btn-ghost" onclick="cancelAppt(${a.id})">Atcelt</button>
+        <button class="btn-sm btn-ghost btn-cancel-full" onclick="cancelAppt(${a.id})">Atcelt</button>
       </div>
     </div>`;
   }).join('');
@@ -506,6 +540,8 @@ function toggleAddService() {
 async function loadServicesTable() {
   const res = await fetch('/api/admin/services-edit', { headers:{'X-Admin-Token':token} });
   const { services } = await res.json();
+
+  // Desktop table
   const tbody = document.getElementById('servicesTbody');
   tbody.innerHTML = services.map(s => `
     <tr>
@@ -517,6 +553,39 @@ async function loadServicesTable() {
         <button class="btn-sm" style="background:#fee2e2;color:#b91c1c;border:0;" onclick="deleteService(${s.id})">Dzēst</button>
       </td>
     </tr>`).join('');
+
+  // Mobile cards
+  const cards = document.getElementById('svcCards');
+  cards.innerHTML = services.map(s => `
+    <div class="svc-card">
+      <div class="svc-card-name">${s.name}</div>
+      <div class="svc-card-row">
+        <div class="svc-card-field">
+          <span class="lbl">Cena (€)</span>
+          <input class="price-inp inp" type="number" id="mp_${s.id}" value="${s.price_eur}" min="1" max="999" style="width:100%;">
+        </div>
+        <div class="svc-card-field">
+          <span class="lbl">Ilgums (min)</span>
+          <input class="dur-inp inp" type="number" id="md_${s.id}" value="${s.duration_min}" min="5" max="240" style="width:100%;">
+        </div>
+      </div>
+      <div class="svc-card-btns">
+        <button class="btn-sm btn-ghost" onclick="saveSvcMobile(${s.id}, this)">Saglabāt</button>
+        <button class="btn-sm" style="background:#fee2e2;color:#b91c1c;border:0;" onclick="deleteService(${s.id})">Dzēst</button>
+      </div>
+    </div>`).join('');
+}
+
+async function saveSvcMobile(id, btn) {
+  const price = Number(document.getElementById('mp_'+id).value);
+  const dur   = Number(document.getElementById('md_'+id).value);
+  const res = await fetch(`/api/admin/services-edit?id=${id}`, {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ price_eur: price, duration_min: dur }),
+  });
+  if (res.ok) { btn.textContent='✓'; setTimeout(()=>btn.textContent='Saglabāt', 2000); }
+  loadServicesForForm();
 }
 
 async function addService() {
