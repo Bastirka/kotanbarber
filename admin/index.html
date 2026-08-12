@@ -273,8 +273,7 @@
       <div class="card" style="padding:0;overflow:hidden;">
         <div id="calGrid"></div>
       </div>
-      <div class="cal-legend">
-        <span><div class="dot" style="background:var(--accent);"></div> Aizņemts</span>
+      <div class="cal-legend" id="calLegend">
         <span><div class="dot" style="background:#f0f0f0;border:1px solid #e0e0e0;"></div> Brīvs</span>
       </div>
     </div>
@@ -598,15 +597,27 @@ function renderBarbers(list) {
   const el = document.getElementById('barberList');
   if (!list.length) { el.innerHTML = '<div class="empty-state">Nav meistaru. Pievieno pirmo!</div>'; return; }
   el.innerHTML = list.map(b => `
-    <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-      <div style="flex:1;">
+    <div class="card" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-left:4px solid ${b.color||'#d92b3a'};">
+      <div style="flex:1;min-width:120px;">
         <div style="font-weight:700;">${b.name} ${b.active?'':'<span style="color:var(--muted);font-weight:400;">(neaktīvs)</span>'}</div>
-        <div style="font-size:.82rem;color:var(--muted);margin-top:3px;">Telegram Chat ID: ${b.telegram_chat_id||'—'}</div>
+        <div style="font-size:.82rem;color:var(--muted);margin-top:3px;">Telegram: ${b.telegram_chat_id||'—'}</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <input class="inp" style="width:130px;padding:6px 10px;" id="btg_${b.id}" value="${b.telegram_chat_id||''}" placeholder="Chat ID">
-        <button class="btn-sm btn-ghost" onclick="updateBarberTg(${b.id})">Saglabāt</button>
-        <button class="btn-sm" style="background:${b.active?'#f3f4f6':'#f0fdf4'};color:${b.active?'#374151':'#15803d'};border:0;" onclick="toggleBarberActive(${b.id}, ${!b.active})">${b.active?'Deaktivēt':'Aktivēt'}</button>
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <span style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Krāsa grafikā</span>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input type="color" id="bcol_${b.id}" value="${b.color||'#d92b3a'}" style="width:38px;height:32px;border:1.5px solid var(--line);border-radius:5px;cursor:pointer;padding:2px;">
+            <button class="btn-sm btn-ghost" onclick="updateBarberColor(${b.id})">✓</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <span style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Chat ID</span>
+          <div style="display:flex;gap:6px;">
+            <input class="inp" style="width:120px;padding:6px 10px;font-size:.88rem;" id="btg_${b.id}" value="${b.telegram_chat_id||''}" placeholder="Chat ID">
+            <button class="btn-sm btn-ghost" onclick="updateBarberTg(${b.id})">✓</button>
+          </div>
+        </div>
+        <button class="btn-sm" style="background:${b.active?'#f3f4f6':'#f0fdf4'};color:${b.active?'#374151':'#15803d'};border:0;align-self:flex-end;" onclick="toggleBarberActive(${b.id}, ${!b.active})">${b.active?'Deaktivēt':'Aktivēt'}</button>
       </div>
     </div>`).join('');
 }
@@ -634,6 +645,16 @@ async function updateBarberTg(id) {
     method:'PATCH',
     headers:{'Content-Type':'application/json','X-Admin-Token':token},
     body: JSON.stringify({ telegram_chat_id: tgId||null }),
+  });
+  loadBarbers();
+}
+
+async function updateBarberColor(id) {
+  const color = document.getElementById('bcol_'+id).value;
+  await fetch(`/api/admin/barbers?id=${id}`, {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ color }),
   });
   loadBarbers();
 }
@@ -921,6 +942,13 @@ async function renderCal() {
   }).format(calDate);
   document.getElementById('calLabel').textContent = label.charAt(0).toUpperCase() + label.slice(1);
 
+  // Update legend with barber colors
+  const legend = document.getElementById('calLegend');
+  const barberDots = allBarbers.filter(b=>b.active).map(b=>
+    `<span><div class="dot" style="background:${b.color||'#d92b3a'};"></div> ${b.name}</span>`
+  ).join('');
+  legend.innerHTML = barberDots + `<span><div class="dot" style="background:#f0f0f0;border:1px solid #e0e0e0;"></div> Brīvs</span>`;
+
   const from = new Date(dateStr + 'T00:00:00+03:00').toISOString();
   const res  = await fetch(`/api/admin/appointments?from=${encodeURIComponent(from)}&days=1`, {
     headers:{'X-Admin-Token':token}
@@ -972,10 +1000,13 @@ async function renderCal() {
       while (i + span < totalSlots && taken[i + span] === appt) span++;
       skip = span - 1;
       const fmtTime = iso => new Intl.DateTimeFormat('lv-LV',{timeZone:'Europe/Riga',hour:'2-digit',minute:'2-digit'}).format(new Date(iso));
+      const barber = allBarbers.find(b => b.id === appt.barber_id);
+      const color = barber ? barber.color : '#d92b3a';
+      const barberName = barber ? ` · ${barber.name}` : '';
       slotsHtml += `
         <div style="height:${span*SLOT_PX}px;position:relative;border-bottom:1px solid var(--line);">
-          <div style="position:absolute;inset:3px;background:var(--accent);border-radius:6px;padding:5px 8px;color:#fff;overflow:hidden;box-shadow:0 2px 6px rgba(217,43,58,.25);">
-            <div style="font-weight:700;font-size:.8rem;">${fmtTime(appt.starts_at)}–${fmtTime(appt.ends_at)}</div>
+          <div style="position:absolute;inset:3px;background:${color};border-radius:6px;padding:5px 8px;color:#fff;overflow:hidden;box-shadow:0 2px 6px ${color}44;">
+            <div style="font-weight:700;font-size:.8rem;">${fmtTime(appt.starts_at)}–${fmtTime(appt.ends_at)}${barberName}</div>
             <div style="font-size:.75rem;opacity:.95;">${appt.service_name}</div>
             <div style="font-size:.72rem;opacity:.8;">${appt.client_name}${appt.phone?' · '+appt.phone:''}</div>
           </div>

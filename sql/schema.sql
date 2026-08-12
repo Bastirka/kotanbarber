@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS barbers (
   id               SERIAL PRIMARY KEY,
   name             TEXT NOT NULL,
   telegram_chat_id TEXT,
+  color            TEXT NOT NULL DEFAULT '#d92b3a',
   active           BOOLEAN NOT NULL DEFAULT true,
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
