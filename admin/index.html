@@ -209,9 +209,9 @@
               <label class="lbl">Meistars</label>
               <select class="inp" id="addBarber"><option value="">— Automātiski —</option></select>
             </div>
-            <div class="span2" style="display:flex;align-items:center;gap:12px;">
+            <div class="span2">
+              <span class="msg" id="addMsg" style="display:block;margin-bottom:10px;font-size:.88rem;min-height:1.2em;"></span>
               <button type="submit" class="btn-sm btn-red" style="padding:10px 20px;">Pievienot pierakstu</button>
-              <span class="msg" id="addMsg"></span>
             </div>
           </div>
         </form>
@@ -454,7 +454,20 @@ document.getElementById('addForm').addEventListener('submit', async ev => {
     body: JSON.stringify({ serviceId, clientName, phone: phone||undefined, startsAt: startsAt.toISOString(), barberId: barberId ? Number(barberId) : undefined }),
   });
   const data = await res.json();
-  if (!res.ok) { msg.className='msg err'; msg.textContent = data.error||'Kļūda.'; return; }
+  if (!res.ok) {
+    msg.className='msg err';
+    if (res.status === 409) {
+      msg.textContent = `⚠ ${time} jau ir aizņemts — izvēlies citu laiku.`;
+      document.getElementById('addTime').style.borderColor = 'var(--accent)';
+      document.getElementById('addDate').style.borderColor = 'var(--accent)';
+      document.getElementById('addTime').focus();
+    } else {
+      msg.textContent = data.error || 'Kļūda.';
+    }
+    return;
+  }
+  document.getElementById('addTime').style.borderColor = '';
+  document.getElementById('addDate').style.borderColor = '';
   msg.className = 'msg ok'; msg.textContent = '✓ Pievienots';
   document.getElementById('addForm').reset();
   setTimeout(() => msg.textContent='', 3000);

@@ -978,7 +978,8 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       const data = await res.json();
       if (!res.ok) {
         if (res.status === 409) {
-          showError('Diemžēl šo laiku tikko paņēma kāds cits. Izvēlies citu laiku.');
+          const takenTime = state.startsAtIso ? fmtDayTime(state.startsAtIso) : '';
+          showError(`${takenTime ? takenTime + ' — š' : 'Š'}is laiks tikko aizņemts. Lūdzu izvēlies citu laiku.`);
           showStep(state.mode === 'queue' ? 'mode' : 'pick');
           if (state.mode === 'scheduled') loadSlots(els.date.value);
         } else {
