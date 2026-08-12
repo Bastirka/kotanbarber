@@ -215,9 +215,33 @@
 
     <!-- ── PAKALPOJUMI ── -->
     <div class="panel" id="panel-services">
-      <div class="section-title" style="margin-bottom:14px;">Pakalpojumi un cenas</div>
+      <div class="section-header">
+        <div class="section-title">Pakalpojumi un cenas</div>
+        <button class="add-toggle" onclick="toggleAddService()">+ Jauns</button>
+      </div>
+      <div class="card add-form-card" id="addServiceCard">
+        <div class="card-title">Jauns pakalpojums</div>
+        <div class="form-grid">
+          <div class="inp-group span2">
+            <label class="lbl">Nosaukums</label>
+            <input class="inp" id="svcName" type="text" placeholder="Piem. Krāsošana">
+          </div>
+          <div class="inp-group">
+            <label class="lbl">Cena (€)</label>
+            <input class="inp" id="svcPrice" type="number" min="1" placeholder="20">
+          </div>
+          <div class="inp-group">
+            <label class="lbl">Ilgums (min)</label>
+            <input class="inp" id="svcDur" type="number" min="5" placeholder="30">
+          </div>
+          <div class="span2" style="display:flex;align-items:center;gap:12px;">
+            <button class="btn-sm btn-red" style="padding:10px 20px;" onclick="addService()">Pievienot</button>
+            <span class="msg" id="svcAddMsg"></span>
+          </div>
+        </div>
+      </div>
       <div class="card">
-        <table class="tbl" id="servicesTable">
+        <table class="tbl">
           <thead><tr><th>Pakalpojums</th><th>Cena (€)</th><th>Ilgums (min)</th><th></th></tr></thead>
           <tbody id="servicesTbody"></tbody>
         </table>
@@ -473,6 +497,12 @@ async function toggleBarberActive(id, active) {
 }
 
 // ── SERVICES ──────────────────────────────────────────────────────────────────
+let addServiceOpen = false;
+function toggleAddService() {
+  addServiceOpen = !addServiceOpen;
+  document.getElementById('addServiceCard').style.display = addServiceOpen ? 'block' : 'none';
+}
+
 async function loadServicesTable() {
   const res = await fetch('/api/admin/services-edit', { headers:{'X-Admin-Token':token} });
   const { services } = await res.json();
@@ -482,11 +512,35 @@ async function loadServicesTable() {
       <td>${s.name}</td>
       <td><input class="price-inp" type="number" id="sp_${s.id}" value="${s.price_eur}" min="1" max="999"></td>
       <td><input class="dur-inp" type="number" id="sd_${s.id}" value="${s.duration_min}" min="5" max="240"></td>
-      <td><button class="btn-sm btn-ghost" onclick="saveService(${s.id})">Saglabāt</button></td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn-sm btn-ghost" onclick="saveService(${s.id}, this)">Saglabāt</button>
+        <button class="btn-sm" style="background:#fee2e2;color:#b91c1c;border:0;" onclick="deleteService(${s.id})">Dzēst</button>
+      </td>
     </tr>`).join('');
 }
 
-async function saveService(id) {
+async function addService() {
+  const name  = document.getElementById('svcName').value.trim();
+  const price = Number(document.getElementById('svcPrice').value);
+  const dur   = Number(document.getElementById('svcDur').value);
+  const msg   = document.getElementById('svcAddMsg');
+  if (!name || !price || !dur) { msg.className='msg err'; msg.textContent='Aizpildi visus laukus.'; return; }
+  const res = await fetch('/api/admin/services-edit', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ name, price_eur: price, duration_min: dur }),
+  });
+  if (!res.ok) { const d=await res.json(); msg.className='msg err'; msg.textContent=d.error||'Kļūda.'; return; }
+  msg.className='msg ok'; msg.textContent='✓ Pievienots';
+  document.getElementById('svcName').value='';
+  document.getElementById('svcPrice').value='';
+  document.getElementById('svcDur').value='';
+  loadServicesTable();
+  loadServicesForForm();
+  setTimeout(()=>msg.textContent='', 3000);
+}
+
+async function saveService(id, btn) {
   const price = Number(document.getElementById('sp_'+id).value);
   const dur   = Number(document.getElementById('sd_'+id).value);
   const res = await fetch(`/api/admin/services-edit?id=${id}`, {
@@ -494,10 +548,20 @@ async function saveService(id) {
     headers:{'Content-Type':'application/json','X-Admin-Token':token},
     body: JSON.stringify({ price_eur: price, duration_min: dur }),
   });
-  if (res.ok) {
-    const btn = event.target;
-    btn.textContent = '✓'; setTimeout(()=>btn.textContent='Saglabāt', 2000);
-  }
+  if (res.ok) { btn.textContent='✓'; setTimeout(()=>btn.textContent='Saglabāt', 2000); }
+  loadServicesForForm();
+}
+
+async function deleteService(id) {
+  if (!confirm('Dzēst šo pakalpojumu? To nevar atgūt.')) return;
+  const res = await fetch(`/api/admin/services-edit?id=${id}`, {
+    method:'DELETE',
+    headers:{'X-Admin-Token':token},
+  });
+  const data = await res.json();
+  if (!res.ok) { alert(data.error || 'Neizdevās dzēst.'); return; }
+  loadServicesTable();
+  loadServicesForForm();
 }
 
 // ── SETTINGS ──────────────────────────────────────────────────────────────────

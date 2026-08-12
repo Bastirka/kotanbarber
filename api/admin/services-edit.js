@@ -13,6 +13,18 @@ module.exports = async (req, res) => {
     return res.status(200).json({ services: rows });
   }
 
+  if (req.method === 'POST') {
+    const { name, price_eur, duration_min } = req.body || {};
+    if (!name || !price_eur || !duration_min) return res.status(400).json({ error: 'name, price_eur, duration_min required' });
+    const { rows: existing } = await query('SELECT MAX(sort_order) AS mx FROM services');
+    const sortOrder = (existing[0].mx || 0) + 1;
+    const { rows } = await query(
+      `INSERT INTO services (name, price_eur, duration_min, sort_order) VALUES ($1,$2,$3,$4) RETURNING *`,
+      [name.trim(), Number(price_eur), Number(duration_min), sortOrder]
+    );
+    return res.status(201).json({ service: rows[0] });
+  }
+
   if (req.method === 'PATCH') {
     const id = Number(req.query.id);
     if (!id) return res.status(400).json({ error: 'id required' });
@@ -31,6 +43,18 @@ module.exports = async (req, res) => {
        id]
     );
     return res.status(200).json({ service: rows[0] });
+  }
+
+  if (req.method === 'DELETE') {
+    const id = Number(req.query.id);
+    if (!id) return res.status(400).json({ error: 'id required' });
+    const { rows } = await query(
+      `SELECT COUNT(*) AS cnt FROM appointments WHERE service_id = $1 AND status = 'confirmed' AND starts_at > now()`,
+      [id]
+    );
+    if (Number(rows[0].cnt) > 0) return res.status(409).json({ error: 'Ir aktīvi pieraksti šim pakalpojumam — vispirms atcel tos.' });
+    await query('DELETE FROM services WHERE id = $1', [id]);
+    return res.status(200).json({ ok: true });
   }
 
   res.status(405).json({ error: 'Method not allowed' });
