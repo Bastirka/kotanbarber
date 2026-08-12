@@ -493,8 +493,8 @@ function renderAppts(list) {
 }
 
 async function assignBarberTo(id, barberId) {
-  await fetch('/api/admin/assign', {
-    method:'POST',
+  await fetch('/api/admin/appointments?assign=1', {
+    method:'PATCH',
     headers:{'Content-Type':'application/json','X-Admin-Token':token},
     body: JSON.stringify({ id, barberId: barberId ? Number(barberId) : null }),
   });

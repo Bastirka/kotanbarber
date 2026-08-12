@@ -12,6 +12,16 @@ module.exports = async (req, res) => {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }
+
+  // PATCH /api/admin/appointments?assign=1 — assign barber
+  if (req.method === 'PATCH' && req.query.assign) {
+    const { id, barberId } = req.body || {};
+    if (!id) { res.status(400).json({ error: 'id required' }); return; }
+    await query('UPDATE appointments SET barber_id = $1 WHERE id = $2', [barberId || null, id]);
+    res.status(200).json({ ok: true });
+    return;
+  }
+
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
