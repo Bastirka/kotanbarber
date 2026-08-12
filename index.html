@@ -126,9 +126,18 @@ header{
   border-bottom:1px solid transparent;
   padding-top:env(safe-area-inset-top);
 }
+/* Melns slānis kas vienmēr nosedz safe-area zonu virs navbar */
+header::before{
+  content:'';
+  position:absolute;
+  top:calc(-1 * env(safe-area-inset-top));
+  left:0; right:0;
+  height:env(safe-area-inset-top);
+  background:#000;
+  z-index:1;
+}
 header.scrolled{
-  background:rgba(10,10,10,.85);
-  backdrop-filter:blur(12px);
+  background:#0a0a0a;
   border-bottom:1px solid var(--line);
 }
 nav{
