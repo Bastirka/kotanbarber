@@ -15,8 +15,9 @@
   "author": "Kotaaans Barbershop",
   "license": "ISC",
   "dependencies": {
+    "@vercel/blob": "^2.8.0",
     "http-server": "^14.1.1",
-    "telegraf": "^4.16.3",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "telegraf": "^4.16.3"
   }
 }

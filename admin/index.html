@@ -354,20 +354,40 @@
         <button class="add-toggle" onclick="toggleAddGallery()">+ Pievienot</button>
       </div>
       <div class="card add-form-card" id="addGalleryCard">
-        <div class="card-title">Jauna bilde</div>
-        <div class="inp-group">
-          <label class="lbl">Bildes URL (saite uz bildi)</label>
-          <input class="inp" id="gUrl" type="url" placeholder="https://...">
+        <div class="card-title">Pievienot bildi</div>
+
+        <!-- Upload tab -->
+        <div style="display:flex;gap:0;margin-bottom:16px;border:1.5px solid var(--line);border-radius:7px;overflow:hidden;">
+          <button id="gTabUpload" onclick="gSwitchTab('upload')" style="flex:1;padding:9px;font-size:.85rem;font-weight:700;border:0;background:var(--accent);color:#fff;cursor:pointer;">📷 Augšupielādēt</button>
+          <button id="gTabUrl" onclick="gSwitchTab('url')" style="flex:1;padding:9px;font-size:.85rem;font-weight:700;border:0;background:var(--white);color:var(--muted);cursor:pointer;">🔗 URL saite</button>
         </div>
-        <div style="font-size:.8rem;color:var(--muted);margin:-8px 0 12px;">
-          Var ielikt saiti no Instagram, Google Drive publiskas bildes, vai jebkuras citas lapas.
+
+        <div id="gPanelUpload">
+          <div id="gDropZone" onclick="document.getElementById('gFile').click()" style="border:2px dashed var(--line);border-radius:8px;padding:32px 16px;text-align:center;cursor:pointer;margin-bottom:12px;transition:border-color .15s;">
+            <div style="font-size:2rem;margin-bottom:8px;">🖼</div>
+            <div style="font-weight:600;margin-bottom:4px;">Nospied lai izvēlētos bildi</div>
+            <div style="font-size:.8rem;color:var(--muted);">vai ievelc šeit · JPG, PNG, WebP</div>
+            <div id="gPreviewWrap" style="display:none;margin-top:12px;">
+              <img id="gPreview" style="max-height:160px;border-radius:6px;max-width:100%;">
+              <div id="gFileName" style="font-size:.78rem;color:var(--muted);margin-top:6px;"></div>
+            </div>
+          </div>
+          <input type="file" id="gFile" accept="image/*" style="display:none;" onchange="gFileSelected(this)">
         </div>
+
+        <div id="gPanelUrl" style="display:none;">
+          <div class="inp-group">
+            <label class="lbl">Saite uz bildi</label>
+            <input class="inp" id="gUrl" type="url" placeholder="https://...">
+          </div>
+        </div>
+
         <div class="inp-group">
           <label class="lbl">Apraksts (nav obligāts)</label>
           <input class="inp" id="gLabel" type="text" placeholder="piem. Fade, Bārda…">
         </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <button class="btn-sm btn-red" style="padding:10px 20px;" onclick="addGalleryImage()">Pievienot bildi</button>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <button class="btn-sm btn-red" style="padding:10px 20px;" onclick="addGalleryImage()">Pievienot</button>
           <span class="msg" id="gMsg"></span>
         </div>
       </div>
@@ -784,20 +804,77 @@ async function loadGallery() {
     </div>`).join('')}</div>`;
 }
 
+let gMode = 'upload';
+let gFileData = null;
+let gFileInfo = null;
+
+function gSwitchTab(tab) {
+  gMode = tab;
+  document.getElementById('gPanelUpload').style.display = tab === 'upload' ? 'block' : 'none';
+  document.getElementById('gPanelUrl').style.display = tab === 'url' ? 'block' : 'none';
+  document.getElementById('gTabUpload').style.background = tab === 'upload' ? 'var(--accent)' : 'var(--white)';
+  document.getElementById('gTabUpload').style.color = tab === 'upload' ? '#fff' : 'var(--muted)';
+  document.getElementById('gTabUrl').style.background = tab === 'url' ? 'var(--accent)' : 'var(--white)';
+  document.getElementById('gTabUrl').style.color = tab === 'url' ? '#fff' : 'var(--muted)';
+}
+
+function gFileSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+  gFileInfo = { name: file.name, type: file.type };
+  const reader = new FileReader();
+  reader.onload = e => {
+    // Compress via canvas
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1400;
+      const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const compressed = canvas.toDataURL('image/jpeg', 0.85);
+      gFileData = compressed.split(',')[1];
+      // Preview
+      document.getElementById('gPreview').src = compressed;
+      document.getElementById('gFileName').textContent = `${file.name} → saspiests ${Math.round(gFileData.length * 0.75 / 1024)}KB`;
+      document.getElementById('gPreviewWrap').style.display = 'block';
+      document.getElementById('gDropZone').style.borderColor = 'var(--accent)';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 async function addGalleryImage() {
-  const url   = document.getElementById('gUrl').value.trim();
   const label = document.getElementById('gLabel').value.trim();
   const msg   = document.getElementById('gMsg');
-  if (!url) { msg.className='msg err'; msg.textContent='Ievadi bildes saiti.'; return; }
+  msg.className = 'msg'; msg.textContent = 'Augšupielādē…';
+
+  let body;
+  if (gMode === 'upload') {
+    if (!gFileData) { msg.className='msg err'; msg.textContent='Izvēlies bildi.'; return; }
+    body = { fileData: gFileData, fileName: gFileInfo.name, fileType: 'image/jpeg', label };
+  } else {
+    const url = document.getElementById('gUrl').value.trim();
+    if (!url) { msg.className='msg err'; msg.textContent='Ievadi bildes saiti.'; return; }
+    body = { url, label };
+  }
+
   const res = await fetch('/api/admin/gallery', {
     method:'POST',
     headers:{'Content-Type':'application/json','X-Admin-Token':token},
-    body: JSON.stringify({ url, label }),
+    body: JSON.stringify(body),
   });
-  if (!res.ok) { msg.className='msg err'; msg.textContent='Kļūda.'; return; }
+  const data = await res.json();
+  if (!res.ok) { msg.className='msg err'; msg.textContent=data.error||'Kļūda.'; return; }
   msg.className='msg ok'; msg.textContent='✓ Pievienota';
-  document.getElementById('gUrl').value='';
+  document.getElementById('gUrl') && (document.getElementById('gUrl').value='');
   document.getElementById('gLabel').value='';
+  document.getElementById('gFile').value='';
+  document.getElementById('gPreviewWrap').style.display='none';
+  document.getElementById('gDropZone').style.borderColor='var(--line)';
+  gFileData = null; gFileInfo = null;
   loadGallery();
   setTimeout(()=>msg.textContent='', 3000);
 }

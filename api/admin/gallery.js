@@ -1,4 +1,5 @@
 const { query } = require('../../lib/db');
+const { put } = require('@vercel/blob');
 
 function checkAuth(req) {
   const token = process.env.ADMIN_TOKEN;
@@ -27,12 +28,27 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    const { url, label } = req.body || {};
-    if (!url) return res.status(400).json({ error: 'url required' });
+    const { url, label, fileData, fileName, fileType } = req.body || {};
+
+    let finalUrl = url;
+
+    // File upload via base64
+    if (fileData && fileName) {
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        return res.status(503).json({ error: 'Blob storage nav iestatīts. Lūdzu iespējo Vercel Blob krātuvi projekta iestatījumos.' });
+      }
+      const buffer = Buffer.from(fileData, 'base64');
+      const ext = (fileType || 'image/jpeg').split('/')[1] || 'jpg';
+      const safeName = `gallery/${Date.now()}-${fileName.replace(/[^a-z0-9.]/gi, '_')}.${ext}`;
+      const blob = await put(safeName, buffer, { access: 'public', contentType: fileType || 'image/jpeg' });
+      finalUrl = blob.url;
+    }
+
+    if (!finalUrl) return res.status(400).json({ error: 'url vai fails nepieciešams' });
     const { rows: mx } = await query('SELECT MAX(sort_order) AS m FROM gallery_images');
     const { rows } = await query(
       'INSERT INTO gallery_images (url, label, sort_order) VALUES ($1,$2,$3) RETURNING *',
-      [url.trim(), (label||'').trim(), (mx[0].m||0)+1]
+      [finalUrl.trim(), (label||'').trim(), (mx[0].m||0)+1]
     );
     return res.status(201).json({ image: rows[0] });
   }
