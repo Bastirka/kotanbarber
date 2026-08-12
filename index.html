@@ -777,6 +777,20 @@ navLinks.querySelectorAll('a').forEach(a =>
 );
 
 /* ====== Scroll reveal animācija ====== */
+// Kad navigē ar hash linku — uzreiz parāda mērķa sadaļas reveal elementus
+function revealSection(hash) {
+  if (!hash) return;
+  const target = document.querySelector(hash);
+  if (!target) return;
+  target.querySelectorAll('.reveal').forEach(el => el.classList.add('show'));
+}
+// Pie lapas ielādes ar hash
+if (location.hash) revealSection(location.hash);
+// Pie katra hash klikšķa
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', () => revealSection(a.getAttribute('href')));
+});
+
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => {
