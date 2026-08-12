@@ -3,6 +3,7 @@ const {
   findNextQueueSlot,
   getAvailableSlots,
   createAppointment,
+  calcFinalPrice,
   localDateStr,
   TZ,
 } = require('../lib/scheduling');
@@ -67,6 +68,7 @@ module.exports = async (req, res) => {
   }
 
   const endsAt = new Date(startsAt.getTime() + service.duration_min * 60000);
+  const finalPriceEur = await calcFinalPrice(service.price_eur, startsAt);
   const result = await createAppointment({
     serviceId,
     startsAt,
@@ -75,6 +77,7 @@ module.exports = async (req, res) => {
     phone,
     source: 'web',
     mode,
+    finalPriceEur,
   });
 
   if (!result.ok) {
@@ -88,7 +91,7 @@ module.exports = async (req, res) => {
       startsAt: result.appointment.starts_at,
       endsAt: result.appointment.ends_at,
       serviceName: service.name,
-      priceEur: service.price_eur,
+      priceEur: finalPriceEur,
     },
   });
 

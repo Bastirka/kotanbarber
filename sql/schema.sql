@@ -41,6 +41,31 @@ CREATE INDEX IF NOT EXISTS idx_appointments_active_range
   ON appointments (starts_at, ends_at)
   WHERE status = 'confirmed';
 
+-- Barbers / meistari
+CREATE TABLE IF NOT EXISTS barbers (
+  id               SERIAL PRIMARY KEY,
+  name             TEXT NOT NULL,
+  telegram_chat_id TEXT,
+  active           BOOLEAN NOT NULL DEFAULT true,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Key-value settings (peak hours, surcharges, etc.)
+CREATE TABLE IF NOT EXISTS settings (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+INSERT INTO settings (key, value) VALUES
+  ('peak_hour_start',      '18'),
+  ('peak_surcharge_pct',   '0'),
+  ('same_day_surcharge_pct', '0')
+ON CONFLICT (key) DO NOTHING;
+
+-- Appointments: barber assignment + final price after surcharge
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS barber_id INTEGER REFERENCES barbers(id);
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS final_price_eur NUMERIC(6,2);
+
 INSERT INTO services (name, duration_min, price_eur, sort_order) VALUES
   ('Matu griezums',        30, 15, 1),
   ('Griezums + bārda',     45, 22, 2),

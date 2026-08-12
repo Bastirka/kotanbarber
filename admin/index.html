@@ -3,199 +3,272 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kotāns — Pieraksti</title>
+<title>Kotāns — Admin</title>
 <style>
   :root{
-    --bg:#f5f5f5;
-    --white:#ffffff;
-    --ink:#111111;
-    --muted:#6b7280;
-    --line:#e5e7eb;
-    --accent:#d92b3a;
-    --accent-soft:#fef2f2;
-    --green:#16a34a;
-    --green-soft:#f0fdf4;
-    --radius:12px;
+    --bg:#f5f5f5; --white:#fff; --ink:#111; --muted:#6b7280;
+    --line:#e5e7eb; --accent:#d92b3a; --accent-soft:#fef2f2;
+    --green:#16a34a; --green-soft:#f0fdf4; --r:10px;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{ background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; }
 
   /* LOGIN */
-  #gate{
-    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
-  }
-  .gate-card{
-    background:var(--white); border-radius:var(--radius); padding:40px 32px; width:100%; max-width:360px;
-    box-shadow:0 4px 24px rgba(0,0,0,.08);
-  }
-  .gate-logo{ font-size:1.6rem; font-weight:800; letter-spacing:-1px; margin-bottom:8px; }
+  #gate{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .gate-card{ background:var(--white); border-radius:var(--r); padding:40px 32px; width:100%; max-width:340px; box-shadow:0 4px 24px rgba(0,0,0,.08); }
+  .gate-logo{ font-size:1.6rem; font-weight:800; letter-spacing:-1px; margin-bottom:6px; }
   .gate-logo span{ color:var(--accent); }
   .gate-sub{ color:var(--muted); font-size:.9rem; margin-bottom:28px; }
-  .field-label{ font-size:.8rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; display:block; }
-  .field-input{
-    width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:8px;
-    font-size:.95rem; color:var(--ink); background:var(--white); outline:none; transition:border-color .15s;
-  }
-  .field-input:focus{ border-color:var(--accent); }
-  .btn-primary{
-    width:100%; padding:13px; background:var(--accent); color:#fff; border:0; border-radius:8px;
-    font-size:.95rem; font-weight:700; cursor:pointer; margin-top:16px; transition:opacity .15s;
-  }
-  .btn-primary:hover{ opacity:.88; }
 
-  /* APP LAYOUT */
-  #app{ display:none; }
-  .topbar{
-    background:var(--white); border-bottom:1px solid var(--line); padding:0 24px;
-    display:flex; align-items:center; justify-content:space-between; height:56px; position:sticky; top:0; z-index:10;
+  /* INPUTS */
+  .lbl{ font-size:.75rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; display:block; }
+  .inp{
+    width:100%; padding:11px 13px; border:1.5px solid var(--line); border-radius:7px;
+    font-size:.95rem; color:var(--ink); background:var(--white); outline:none;
+    font-family:inherit; transition:border-color .15s;
   }
+  .inp:focus{ border-color:var(--accent); }
+  select.inp{ appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:32px; }
+  .inp-group{ margin-bottom:14px; }
+  .btn-primary{ width:100%; padding:12px; background:var(--accent); color:#fff; border:0; border-radius:7px; font-size:.95rem; font-weight:700; cursor:pointer; margin-top:14px; transition:opacity .15s; }
+  .btn-primary:hover{ opacity:.88; }
+  .btn-sm{ padding:7px 13px; border-radius:6px; font-size:.82rem; font-weight:700; cursor:pointer; border:0; transition:opacity .15s; }
+  .btn-sm:hover{ opacity:.85; }
+  .btn-red{ background:var(--accent); color:#fff; }
+  .btn-ghost{ background:none; border:1.5px solid var(--line); color:var(--muted); }
+  .btn-ghost:hover{ border-color:var(--accent); color:var(--accent); }
+  .btn-green{ background:var(--green); color:#fff; }
+
+  /* APP */
+  #app{ display:none; }
+  .topbar{ background:var(--white); border-bottom:1px solid var(--line); padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:54px; position:sticky; top:0; z-index:20; }
   .topbar-logo{ font-weight:800; font-size:1.1rem; letter-spacing:-.5px; }
   .topbar-logo span{ color:var(--accent); }
+  .topbar-right{ display:flex; align-items:center; gap:10px; }
   .topbar-logout{ font-size:.82rem; color:var(--muted); cursor:pointer; background:none; border:0; }
-  .topbar-logout:hover{ color:var(--ink); }
 
-  .main{ max-width:800px; margin:0 auto; padding:24px 16px 60px; }
+  /* TABS */
+  .tabs{ background:var(--white); border-bottom:1px solid var(--line); display:flex; padding:0 20px; overflow-x:auto; }
+  .tab{ padding:14px 16px; font-size:.88rem; font-weight:600; color:var(--muted); cursor:pointer; border:0; background:none; border-bottom:2px solid transparent; white-space:nowrap; transition:all .15s; }
+  .tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
 
-  /* ADD FORM */
-  .section-title{ font-size:1rem; font-weight:700; margin-bottom:14px; }
-  .add-card{
-    background:var(--white); border-radius:var(--radius); padding:20px; margin-bottom:28px;
-    box-shadow:0 1px 4px rgba(0,0,0,.06);
-  }
-  .add-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .add-grid .span2{ grid-column:1/-1; }
-  .field-wrap{ display:flex; flex-direction:column; }
-  select.field-input{ appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:32px; }
-  #addMsg{ font-size:.85rem; margin-top:4px; color:var(--muted); }
-  #addMsg.ok{ color:var(--green); }
-  #addMsg.error{ color:var(--accent); }
+  /* MAIN */
+  .main{ max-width:860px; margin:0 auto; padding:20px 16px 60px; }
+  .panel{ display:none; }
+  .panel.active{ display:block; }
 
-  /* APPOINTMENTS */
-  .appt-card{
-    background:var(--white); border-radius:var(--radius); padding:16px 18px;
-    margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06);
-    display:flex; align-items:center; gap:14px;
-  }
-  .appt-time-block{
-    min-width:70px; text-align:center; background:var(--accent-soft);
-    border-radius:8px; padding:8px 6px;
-  }
-  .appt-time-block .hour{ font-size:1.25rem; font-weight:800; color:var(--accent); line-height:1; }
-  .appt-time-block .date{ font-size:.7rem; color:var(--accent); margin-top:3px; }
-  .appt-info{ flex:1; }
-  .appt-service{ font-weight:700; font-size:.95rem; }
-  .appt-client{ color:var(--muted); font-size:.85rem; margin-top:3px; }
-  .appt-badge{
-    font-size:.72rem; font-weight:700; padding:2px 7px; border-radius:20px; text-transform:uppercase; letter-spacing:.3px;
-  }
-  .badge-queue{ background:#fef9c3; color:#a16207; }
-  .badge-scheduled{ background:#eff6ff; color:#1d4ed8; }
-  .badge-web{ background:#f0fdf4; color:#15803d; }
-  .appt-cancel{
-    background:none; border:1.5px solid var(--line); color:var(--muted); border-radius:8px;
-    padding:8px 12px; cursor:pointer; font-size:.82rem; white-space:nowrap; transition:all .15s;
-  }
-  .appt-cancel:hover{ border-color:var(--accent); color:var(--accent); }
-  .empty-state{ text-align:center; padding:48px 16px; color:var(--muted); }
-  .empty-icon{ font-size:2.5rem; margin-bottom:10px; }
-
-  /* SECTION HEADER */
+  /* CARDS */
+  .card{ background:var(--white); border-radius:var(--r); padding:18px 20px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  .card-title{ font-size:.95rem; font-weight:700; margin-bottom:14px; }
   .section-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-  .appt-count{ font-size:.82rem; color:var(--muted); background:var(--bg); padding:4px 10px; border-radius:20px; }
+  .section-title{ font-size:1rem; font-weight:700; }
+  .badge{ font-size:.72rem; font-weight:700; padding:3px 8px; border-radius:20px; text-transform:uppercase; }
+  .badge-q{ background:#fef9c3; color:#a16207; }
+  .badge-s{ background:#eff6ff; color:#1d4ed8; }
+  .badge-w{ background:#f0fdf4; color:#15803d; }
+  .badge-m{ background:#f3f4f6; color:#374151; }
+  .empty-state{ text-align:center; padding:40px 16px; color:var(--muted); font-size:.9rem; }
+  .msg{ font-size:.82rem; margin-top:6px; color:var(--muted); }
+  .msg.ok{ color:var(--green); }
+  .msg.err{ color:var(--accent); }
 
-  /* TOGGLE ADD FORM */
-  .add-toggle{
-    background:var(--accent); color:#fff; border:0; border-radius:8px;
-    padding:9px 16px; font-size:.85rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px;
-  }
+  /* APPOINTMENT CARD */
+  .appt-card{ background:var(--white); border-radius:var(--r); padding:14px 16px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .appt-time{ min-width:66px; text-align:center; background:var(--accent-soft); border-radius:7px; padding:7px 5px; }
+  .appt-time .hour{ font-size:1.2rem; font-weight:800; color:var(--accent); line-height:1; }
+  .appt-time .date{ font-size:.68rem; color:var(--accent); margin-top:2px; }
+  .appt-info{ flex:1; min-width:160px; }
+  .appt-service{ font-weight:700; font-size:.92rem; }
+  .appt-client{ color:var(--muted); font-size:.82rem; margin-top:3px; }
+  .appt-barber{ font-size:.78rem; color:var(--green); font-weight:600; margin-top:3px; }
+  .appt-actions{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .barber-select{ padding:6px 10px; border:1.5px solid var(--line); border-radius:6px; font-size:.8rem; background:var(--white); cursor:pointer; }
+
+  /* ADD FORM TOGGLE */
+  .add-toggle{ background:var(--accent); color:#fff; border:0; border-radius:7px; padding:8px 14px; font-size:.85rem; font-weight:700; cursor:pointer; }
+  .add-form-card{ display:none; }
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .form-grid .span2{ grid-column:1/-1; }
+
+  /* TABLE */
+  .tbl{ width:100%; border-collapse:collapse; font-size:.88rem; }
+  .tbl th{ text-align:left; padding:8px 10px; font-size:.72rem; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); border-bottom:1px solid var(--line); }
+  .tbl td{ padding:10px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  .tbl tr:last-child td{ border-bottom:0; }
+  .price-inp{ width:70px; padding:5px 8px; border:1.5px solid var(--line); border-radius:5px; font-size:.88rem; text-align:center; }
+  .dur-inp{ width:60px; padding:5px 8px; border:1.5px solid var(--line); border-radius:5px; font-size:.88rem; text-align:center; }
 
   @media(max-width:560px){
-    .add-grid{ grid-template-columns:1fr; }
-    .add-grid .span2{ grid-column:1; }
-    .appt-card{ flex-wrap:wrap; }
-    .appt-time-block{ min-width:60px; }
-    .topbar{ padding:0 16px; }
+    .form-grid{ grid-template-columns:1fr; }
+    .form-grid .span2{ grid-column:1; }
+    .appt-card{ gap:8px; }
+    .tbl{ font-size:.8rem; }
+    .tabs{ gap:0; }
+    .tab{ padding:12px 10px; font-size:.8rem; }
   }
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="gate">
   <div class="gate-card">
     <div class="gate-logo">KOTĀNS<span>.</span></div>
     <p class="gate-sub">Admin panelis</p>
-    <div class="field-wrap">
-      <label class="field-label" for="token">Parole</label>
-      <input class="field-input" id="token" type="password" placeholder="Ievadi admin paroli" onkeydown="if(event.key==='Enter')login()">
+    <div class="inp-group">
+      <label class="lbl" for="tokenInp">Parole</label>
+      <input class="inp" id="tokenInp" type="password" placeholder="Admin parole" onkeydown="if(event.key==='Enter')login()">
     </div>
     <button class="btn-primary" onclick="login()">Ieiet</button>
   </div>
 </div>
 
+<!-- APP -->
 <div id="app">
   <div class="topbar">
     <div class="topbar-logo">KOTĀNS<span>.</span></div>
-    <button class="topbar-logout" onclick="logout()">Iziet</button>
+    <div class="topbar-right">
+      <button class="topbar-logout" onclick="logout()">Iziet</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('appts')">Pieraksti</button>
+    <button class="tab" onclick="switchTab('barbers')">Meistari</button>
+    <button class="tab" onclick="switchTab('services')">Pakalpojumi</button>
+    <button class="tab" onclick="switchTab('pricing')">Cenu iestatījumi</button>
   </div>
 
   <div class="main">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-      <h1 style="font-size:1.3rem;font-weight:800;">Pieraksti</h1>
-      <button class="add-toggle" onclick="toggleAdd()">+ Pievienot</button>
+
+    <!-- ── PIERAKSTI ── -->
+    <div class="panel active" id="panel-appts">
+      <div class="section-header">
+        <div class="section-title">Gaidāmie pieraksti</div>
+        <button class="add-toggle" onclick="toggleAdd()">+ Pievienot</button>
+      </div>
+
+      <div class="card add-form-card" id="addCard">
+        <div class="card-title">Manuāls pieraksts</div>
+        <form id="addForm">
+          <div class="form-grid">
+            <div class="inp-group span2">
+              <label class="lbl">Pakalpojums</label>
+              <select class="inp" id="addService"></select>
+            </div>
+            <div class="inp-group">
+              <label class="lbl">Klienta vārds</label>
+              <input class="inp" id="addName" type="text" placeholder="Vārds Uzvārds" required autocomplete="off">
+            </div>
+            <div class="inp-group">
+              <label class="lbl">Telefons (nav obligāts)</label>
+              <input class="inp" id="addPhone" type="tel" placeholder="+371 2x xxx xxx" autocomplete="off">
+            </div>
+            <div class="inp-group">
+              <label class="lbl">Datums</label>
+              <input class="inp" id="addDate" type="date" required>
+            </div>
+            <div class="inp-group">
+              <label class="lbl">Laiks</label>
+              <input class="inp" id="addTime" type="time" required>
+            </div>
+            <div class="inp-group">
+              <label class="lbl">Meistars</label>
+              <select class="inp" id="addBarber"><option value="">— Automātiski —</option></select>
+            </div>
+            <div class="span2" style="display:flex;align-items:center;gap:12px;">
+              <button type="submit" class="btn-sm btn-red" style="padding:10px 20px;">Pievienot pierakstu</button>
+              <span class="msg" id="addMsg"></span>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div id="apptList"></div>
     </div>
 
-    <div class="add-card" id="addCard" style="display:none;">
-      <div class="section-title">Manuāls pieraksts</div>
-      <form id="addForm">
-        <div class="add-grid">
-          <div class="field-wrap span2">
-            <label class="field-label">Pakalpojums</label>
-            <select class="field-input" id="addService"></select>
+    <!-- ── MEISTARI ── -->
+    <div class="panel" id="panel-barbers">
+      <div class="section-header">
+        <div class="section-title">Meistari</div>
+        <button class="add-toggle" onclick="toggleAddBarber()">+ Pievienot</button>
+      </div>
+      <div class="card add-form-card" id="addBarberCard">
+        <div class="card-title">Jauns meistars</div>
+        <div class="form-grid">
+          <div class="inp-group">
+            <label class="lbl">Vārds</label>
+            <input class="inp" id="bName" type="text" placeholder="Piem. Artūrs">
           </div>
-          <div class="field-wrap">
-            <label class="field-label">Vārds</label>
-            <input class="field-input" id="addName" type="text" placeholder="Klients" required autocomplete="off">
+          <div class="inp-group">
+            <label class="lbl">Telegram Chat ID</label>
+            <input class="inp" id="bTgId" type="text" placeholder="1215911050">
           </div>
-          <div class="field-wrap">
-            <label class="field-label">Telefons (nav obligāts)</label>
-            <input class="field-input" id="addPhone" type="tel" placeholder="+371 2x xxx xxx" autocomplete="off">
-          </div>
-          <div class="field-wrap">
-            <label class="field-label">Datums</label>
-            <input class="field-input" id="addDate" type="date" required>
-          </div>
-          <div class="field-wrap">
-            <label class="field-label">Laiks</label>
-            <input class="field-input" id="addTime" type="time" required>
-          </div>
-          <div class="span2" style="display:flex;gap:10px;align-items:center;margin-top:4px;">
-            <button type="submit" class="btn-primary" style="margin-top:0;">Pievienot pierakstu</button>
-            <div id="addMsg"></div>
+          <div class="span2" style="display:flex;align-items:center;gap:12px;">
+            <button class="btn-sm btn-red" style="padding:10px 20px;" onclick="addBarber()">Pievienot</button>
+            <span class="msg" id="bMsg"></span>
           </div>
         </div>
-      </form>
+      </div>
+      <div id="barberList"></div>
     </div>
 
-    <div class="section-header">
-      <div class="section-title" style="margin-bottom:0;">Gaidāmie pieraksti</div>
-      <div class="appt-count" id="apptCount"></div>
+    <!-- ── PAKALPOJUMI ── -->
+    <div class="panel" id="panel-services">
+      <div class="section-title" style="margin-bottom:14px;">Pakalpojumi un cenas</div>
+      <div class="card">
+        <table class="tbl" id="servicesTable">
+          <thead><tr><th>Pakalpojums</th><th>Cena (€)</th><th>Ilgums (min)</th><th></th></tr></thead>
+          <tbody id="servicesTbody"></tbody>
+        </table>
+      </div>
     </div>
-    <div id="list"></div>
-  </div>
-</div>
+
+    <!-- ── CENU IESTATĪJUMI ── -->
+    <div class="panel" id="panel-pricing">
+      <div class="section-title" style="margin-bottom:14px;">Cenu piemaksas</div>
+      <div class="card">
+        <div class="card-title">Vakara piemaksa</div>
+        <div class="form-grid">
+          <div class="inp-group">
+            <label class="lbl">No kuras stundas (piem. 18)</label>
+            <input class="inp" id="sPeakHour" type="number" min="0" max="23" placeholder="18">
+          </div>
+          <div class="inp-group">
+            <label class="lbl">Piemaksa %</label>
+            <input class="inp" id="sPeakPct" type="number" min="0" max="100" placeholder="0 = izslēgts">
+          </div>
+        </div>
+        <div class="card-title" style="margin-top:14px;">Tajā pašā dienā piemaksa</div>
+        <div class="form-grid">
+          <div class="inp-group">
+            <label class="lbl">Piemaksa %</label>
+            <input class="inp" id="sSameDayPct" type="number" min="0" max="100" placeholder="0 = izslēgts">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="btn-sm btn-red" style="padding:10px 20px;" onclick="saveSettings()">Saglabāt</button>
+          <span class="msg" id="settingsMsg"></span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
 
 <script>
 let token = localStorage.getItem('kotan_admin_token') || '';
-let services = [];
+let allBarbers = [];
 let addOpen = false;
+let addBarberOpen = false;
 
+// ── AUTH ──────────────────────────────────────────────────────────────────────
 function login() {
-  token = document.getElementById('token').value.trim();
+  token = document.getElementById('tokenInp').value.trim();
   if (!token) return;
   localStorage.setItem('kotan_admin_token', token);
   boot();
 }
-
 function logout() {
   localStorage.removeItem('kotan_admin_token');
   token = '';
@@ -203,11 +276,7 @@ function logout() {
   document.getElementById('app').style.display = 'none';
 }
 
-function toggleAdd() {
-  addOpen = !addOpen;
-  document.getElementById('addCard').style.display = addOpen ? 'block' : 'none';
-}
-
+// ── BOOT ──────────────────────────────────────────────────────────────────────
 async function boot() {
   const res = await fetch('/api/admin/appointments?days=14', { headers: { 'X-Admin-Token': token } });
   if (!res.ok) {
@@ -219,105 +288,245 @@ async function boot() {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   const { appointments } = await res.json();
-  render(appointments);
-  loadServices();
+  renderAppts(appointments);
+  loadServicesForForm();
+  loadBarbers();
+  loadServicesTable();
+  loadSettings();
 }
 
-async function loadServices() {
-  if (services.length > 0) return;
-  const res = await fetch('/api/services');
-  const data = await res.json();
-  services = data.services;
-  const sel = document.getElementById('addService');
-  sel.innerHTML = services.map((s) => `<option value="${s.id}">${s.name} · ${s.durationMin} min · €${s.priceEur}</option>`).join('');
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['appts','barbers','services','pricing'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
 }
 
-function render(list) {
-  const el = document.getElementById('list');
-  const count = document.getElementById('apptCount');
-  count.textContent = list.length ? `${list.length} pieraksts${list.length > 1 ? 'i' : ''}` : '';
+// ── APPOINTMENTS ──────────────────────────────────────────────────────────────
+function toggleAdd() {
+  addOpen = !addOpen;
+  document.getElementById('addCard').style.display = addOpen ? 'block' : 'none';
+}
 
-  if (list.length === 0) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div>Nav gaidāmu pierakstu</div></div>';
-    return;
-  }
+function renderAppts(list) {
+  const el = document.getElementById('apptList');
+  if (!list.length) { el.innerHTML = '<div class="empty-state">Nav gaidāmu pierakstu 📅</div>'; return; }
 
-  const fmtHour = (iso) => new Intl.DateTimeFormat('lv-LV', {
-    timeZone: 'Europe/Riga', hour: '2-digit', minute: '2-digit',
-  }).format(new Date(iso));
-  const fmtDate = (iso) => new Intl.DateTimeFormat('lv-LV', {
-    timeZone: 'Europe/Riga', weekday: 'short', day: '2-digit', month: '2-digit',
-  }).format(new Date(iso));
+  const fmtH = iso => new Intl.DateTimeFormat('lv-LV',{timeZone:'Europe/Riga',hour:'2-digit',minute:'2-digit'}).format(new Date(iso));
+  const fmtD = iso => new Intl.DateTimeFormat('lv-LV',{timeZone:'Europe/Riga',weekday:'short',day:'2-digit',month:'2-digit'}).format(new Date(iso));
+  const srcBadge = { queue:'badge-q', scheduled:'badge-s', web:'badge-w', manual:'badge-m', telegram:'badge-q' };
+  const srcLabel = { queue:'rinda', scheduled:'grafiks', web:'lapa', manual:'manuāls', telegram:'tg' };
 
-  const badges = { queue: ['badge-queue','rinda'], scheduled: ['badge-scheduled','grafiks'], web: ['badge-web','lapa'] };
+  const barberOptions = allBarbers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
 
-  el.innerHTML = list.map((a) => {
+  el.innerHTML = list.map(a => {
     const src = a.source || a.mode;
-    const [bClass, bLabel] = badges[src] || badges[a.mode] || ['badge-web', src];
-    const phone = a.phone ? `· ${a.phone}` : '';
-    const tg = a.telegram_username ? `· @${a.telegram_username}` : '';
+    const price = a.final_price_eur ? `€${parseFloat(a.final_price_eur).toFixed(0)}` : `€${a.price_eur}`;
+    const phone = a.phone ? ` · ${a.phone}` : '';
+    const tg    = a.telegram_username ? ` · @${a.telegram_username}` : '';
+    const barberLabel = a.barber_name ? `<div class="appt-barber">▶ ${a.barber_name}</div>` : '<div class="appt-barber" style="color:var(--muted)">— nav piešķirts —</div>';
     return `
     <div class="appt-card">
-      <div class="appt-time-block">
-        <div class="hour">${fmtHour(a.starts_at)}</div>
-        <div class="date">${fmtDate(a.starts_at)}</div>
+      <div class="appt-time">
+        <div class="hour">${fmtH(a.starts_at)}</div>
+        <div class="date">${fmtD(a.starts_at)}</div>
       </div>
       <div class="appt-info">
-        <div class="appt-service">${a.service_name} <span class="appt-badge ${bClass}">${bLabel}</span></div>
-        <div class="appt-client">${a.client_name}${tg}${phone} · €${a.price_eur}</div>
+        <div class="appt-service">${a.service_name} <span class="badge ${srcBadge[src]||'badge-m'}">${srcLabel[src]||src}</span></div>
+        <div class="appt-client">${a.client_name}${phone}${tg} · ${price}</div>
+        ${barberLabel}
       </div>
-      <button class="appt-cancel" onclick="cancelAppt(${a.id})">Atcelt</button>
+      <div class="appt-actions">
+        <select class="barber-select" onchange="assignBarberTo(${a.id}, this.value)">
+          <option value="">Piešķirt…</option>
+          ${barberOptions}
+        </select>
+        <button class="btn-sm btn-ghost" onclick="cancelAppt(${a.id})">Atcelt</button>
+      </div>
     </div>`;
   }).join('');
+}
+
+async function assignBarberTo(id, barberId) {
+  await fetch('/api/admin/assign', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ id, barberId: barberId ? Number(barberId) : null }),
+  });
+  boot();
 }
 
 async function cancelAppt(id) {
   if (!confirm('Atcelt šo pierakstu?')) return;
   await fetch('/api/admin/cancel', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
     body: JSON.stringify({ id }),
   });
   boot();
 }
 
-document.getElementById('addForm').addEventListener('submit', async (ev) => {
+// ── ADD APPOINTMENT FORM ──────────────────────────────────────────────────────
+async function loadServicesForForm() {
+  const res = await fetch('/api/services');
+  const { services } = await res.json();
+  document.getElementById('addService').innerHTML = services.map(s => `<option value="${s.id}">${s.name} · ${s.durationMin}min · €${s.priceEur}</option>`).join('');
+}
+
+document.getElementById('addForm').addEventListener('submit', async ev => {
   ev.preventDefault();
   const msg = document.getElementById('addMsg');
-  msg.className = '';
-  msg.textContent = 'Pievieno…';
-
-  const serviceId = Number(document.getElementById('addService').value);
+  msg.className = 'msg'; msg.textContent = 'Pievieno…';
+  const serviceId  = Number(document.getElementById('addService').value);
   const clientName = document.getElementById('addName').value.trim();
-  const date = document.getElementById('addDate').value;
-  const time = document.getElementById('addTime').value;
-  const phone = document.getElementById('addPhone').value.trim();
-
+  const date       = document.getElementById('addDate').value;
+  const time       = document.getElementById('addTime').value;
+  const phone      = document.getElementById('addPhone').value.trim();
+  const barberId   = document.getElementById('addBarber').value;
   if (!serviceId || !clientName || !date || !time) {
-    msg.className = 'error';
-    msg.textContent = 'Aizpildi visus laukus.';
-    return;
+    msg.className = 'msg err'; msg.textContent = 'Aizpildi visus laukus.'; return;
   }
-
   const startsAt = new Date(`${date}T${time}:00`);
   const res = await fetch('/api/admin/create', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
-    body: JSON.stringify({ serviceId, clientName, phone: phone || undefined, startsAt: startsAt.toISOString() }),
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ serviceId, clientName, phone: phone||undefined, startsAt: startsAt.toISOString(), barberId: barberId ? Number(barberId) : undefined }),
   });
   const data = await res.json();
-  if (!res.ok) {
-    msg.className = 'error';
-    msg.textContent = data.error || 'Neizdevās pievienot.';
-    return;
-  }
-  msg.className = 'ok';
-  msg.textContent = '✓ Pievienots';
+  if (!res.ok) { msg.className='msg err'; msg.textContent = data.error||'Kļūda.'; return; }
+  msg.className = 'msg ok'; msg.textContent = '✓ Pievienots';
   document.getElementById('addForm').reset();
-  setTimeout(() => { msg.textContent = ''; }, 3000);
+  setTimeout(() => msg.textContent='', 3000);
   boot();
 });
 
+// ── BARBERS ───────────────────────────────────────────────────────────────────
+function toggleAddBarber() {
+  addBarberOpen = !addBarberOpen;
+  document.getElementById('addBarberCard').style.display = addBarberOpen ? 'block' : 'none';
+}
+
+async function loadBarbers() {
+  const res = await fetch('/api/admin/barbers', { headers:{'X-Admin-Token':token} });
+  const { barbers } = await res.json();
+  allBarbers = barbers;
+  renderBarbers(barbers);
+  // Update barber selects
+  const opts = '<option value="">— Automātiski —</option>' + barbers.filter(b=>b.active).map(b=>`<option value="${b.id}">${b.name}</option>`).join('');
+  document.getElementById('addBarber').innerHTML = opts;
+}
+
+function renderBarbers(list) {
+  const el = document.getElementById('barberList');
+  if (!list.length) { el.innerHTML = '<div class="empty-state">Nav meistaru. Pievieno pirmo!</div>'; return; }
+  el.innerHTML = list.map(b => `
+    <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <div style="flex:1;">
+        <div style="font-weight:700;">${b.name} ${b.active?'':'<span style="color:var(--muted);font-weight:400;">(neaktīvs)</span>'}</div>
+        <div style="font-size:.82rem;color:var(--muted);margin-top:3px;">Telegram Chat ID: ${b.telegram_chat_id||'—'}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input class="inp" style="width:130px;padding:6px 10px;" id="btg_${b.id}" value="${b.telegram_chat_id||''}" placeholder="Chat ID">
+        <button class="btn-sm btn-ghost" onclick="updateBarberTg(${b.id})">Saglabāt</button>
+        <button class="btn-sm" style="background:${b.active?'#f3f4f6':'#f0fdf4'};color:${b.active?'#374151':'#15803d'};border:0;" onclick="toggleBarberActive(${b.id}, ${!b.active})">${b.active?'Deaktivēt':'Aktivēt'}</button>
+      </div>
+    </div>`).join('');
+}
+
+async function addBarber() {
+  const name = document.getElementById('bName').value.trim();
+  const tgId = document.getElementById('bTgId').value.trim();
+  const msg  = document.getElementById('bMsg');
+  if (!name) { msg.className='msg err'; msg.textContent='Ievadi vārdu.'; return; }
+  await fetch('/api/admin/barbers', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ name, telegram_chat_id: tgId||undefined }),
+  });
+  msg.className='msg ok'; msg.textContent='✓ Pievienots';
+  document.getElementById('bName').value='';
+  document.getElementById('bTgId').value='';
+  loadBarbers();
+  setTimeout(()=>msg.textContent='', 3000);
+}
+
+async function updateBarberTg(id) {
+  const tgId = document.getElementById('btg_'+id).value.trim();
+  await fetch(`/api/admin/barbers?id=${id}`, {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ telegram_chat_id: tgId||null }),
+  });
+  loadBarbers();
+}
+
+async function toggleBarberActive(id, active) {
+  await fetch(`/api/admin/barbers?id=${id}`, {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ active }),
+  });
+  loadBarbers();
+}
+
+// ── SERVICES ──────────────────────────────────────────────────────────────────
+async function loadServicesTable() {
+  const res = await fetch('/api/admin/services-edit', { headers:{'X-Admin-Token':token} });
+  const { services } = await res.json();
+  const tbody = document.getElementById('servicesTbody');
+  tbody.innerHTML = services.map(s => `
+    <tr>
+      <td>${s.name}</td>
+      <td><input class="price-inp" type="number" id="sp_${s.id}" value="${s.price_eur}" min="1" max="999"></td>
+      <td><input class="dur-inp" type="number" id="sd_${s.id}" value="${s.duration_min}" min="5" max="240"></td>
+      <td><button class="btn-sm btn-ghost" onclick="saveService(${s.id})">Saglabāt</button></td>
+    </tr>`).join('');
+}
+
+async function saveService(id) {
+  const price = Number(document.getElementById('sp_'+id).value);
+  const dur   = Number(document.getElementById('sd_'+id).value);
+  const res = await fetch(`/api/admin/services-edit?id=${id}`, {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ price_eur: price, duration_min: dur }),
+  });
+  if (res.ok) {
+    const btn = event.target;
+    btn.textContent = '✓'; setTimeout(()=>btn.textContent='Saglabāt', 2000);
+  }
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────────
+async function loadSettings() {
+  const res = await fetch('/api/admin/settings', { headers:{'X-Admin-Token':token} });
+  if (!res.ok) return;
+  const { settings } = await res.json();
+  document.getElementById('sPeakHour').value   = settings['peak_hour_start']      || '18';
+  document.getElementById('sPeakPct').value    = settings['peak_surcharge_pct']   || '0';
+  document.getElementById('sSameDayPct').value = settings['same_day_surcharge_pct'] || '0';
+}
+
+async function saveSettings() {
+  const msg = document.getElementById('settingsMsg');
+  const res = await fetch('/api/admin/settings', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({
+      peak_hour_start:        document.getElementById('sPeakHour').value,
+      peak_surcharge_pct:     document.getElementById('sPeakPct').value,
+      same_day_surcharge_pct: document.getElementById('sSameDayPct').value,
+    }),
+  });
+  msg.className = res.ok ? 'msg ok' : 'msg err';
+  msg.textContent = res.ok ? '✓ Saglabāts' : 'Kļūda';
+  setTimeout(()=>msg.textContent='', 3000);
+}
+
+// ── START ─────────────────────────────────────────────────────────────────────
 if (token) boot();
 else document.getElementById('gate').style.display = 'flex';
 </script>
