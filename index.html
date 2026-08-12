@@ -379,39 +379,94 @@ section{ padding:120px 0; }
 
 /* REZERVĒT / BOOKING WIDGET */
 .booking{
-  max-width:640px; margin:0 auto; border:1px solid var(--line);
-  background:var(--bg-soft); padding:40px;
+  max-width:600px; margin:0 auto; background:var(--bg-soft);
+  border:1px solid var(--line); border-radius:4px; padding:32px 36px;
 }
-.bk-services{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:22px; }
+
+/* Step indicator */
+.bk-steps{
+  display:flex; align-items:center; margin-bottom:30px; gap:0;
+}
+.bk-step-dot{
+  display:flex; flex-direction:column; align-items:center; flex:1; position:relative;
+}
+.bk-step-dot:not(:last-child)::after{
+  content:''; position:absolute; top:14px; left:50%; width:100%; height:1px;
+  background:var(--line); z-index:0;
+}
+.bk-step-dot.active:not(:last-child)::after,
+.bk-step-dot.done:not(:last-child)::after{ background:var(--accent); }
+.bk-step-num{
+  width:28px; height:28px; border-radius:50%; border:2px solid var(--line);
+  display:flex; align-items:center; justify-content:center; font-size:.75rem;
+  font-weight:700; background:var(--bg-soft); position:relative; z-index:1; color:var(--muted);
+}
+.bk-step-dot.active .bk-step-num{ border-color:var(--accent); color:var(--accent); background:var(--bg-soft); }
+.bk-step-dot.done .bk-step-num{ border-color:var(--accent); background:var(--accent); color:#fff; }
+.bk-step-lbl{ font-size:.68rem; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-top:5px; text-align:center; }
+.bk-step-dot.active .bk-step-lbl{ color:var(--ink); }
+
+/* Services grid */
+.bk-services{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .bk-service{
-  border:1px solid var(--line); padding:16px; cursor:pointer; text-align:left;
-  background:transparent; color:var(--ink); font-family:inherit; transition:border-color .2s;
+  border:1px solid var(--line); padding:16px 14px; cursor:pointer; text-align:left;
+  background:transparent; color:var(--ink); font-family:inherit; transition:all .15s; border-radius:2px;
 }
 .bk-service:hover{ border-color:var(--accent); }
-.bk-service.active{ border-color:var(--accent); background:rgba(217,43,58,.08); }
-.bk-service .nm{ font-weight:700; font-size:.95rem; }
-.bk-service .meta{ color:var(--muted); font-size:.8rem; margin-top:4px; }
-.bk-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
-.bk-row .btn{ flex:1; min-width:180px; text-align:center; }
+.bk-service.active{ border-color:var(--accent); background:rgba(217,43,58,.07); }
+.bk-service .nm{ font-weight:700; font-size:.92rem; margin-bottom:6px; }
+.bk-service .price{ color:var(--accent); font-weight:800; font-size:1.05rem; }
+.bk-service .dur{ color:var(--muted); font-size:.78rem; margin-top:2px; }
+
+/* Mode buttons */
+.bk-row{ display:flex; gap:10px; flex-wrap:wrap; }
+.bk-row .btn{ flex:1; min-width:160px; text-align:center; }
+
+/* Date + slots */
+.bk-label{ font-size:.75rem; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:8px; display:block; }
 .bk-field{
-  width:100%; padding:12px 14px; margin-bottom:12px; background:var(--bg);
-  border:1px solid var(--line); color:var(--ink); font-family:inherit; font-size:.95rem;
+  width:100%; padding:12px 14px; background:var(--bg);
+  border:1px solid var(--line); color:var(--ink); font-family:inherit; font-size:.95rem; border-radius:2px;
 }
 select.bk-field{ appearance:none; }
-.bk-slots{ display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 4px; }
+.bk-slots{ display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 8px; }
 .bk-slot{
-  border:1px solid var(--line); padding:8px 14px; background:transparent; color:var(--ink);
-  cursor:pointer; font-family:inherit; font-size:.85rem;
+  border:1px solid var(--line); padding:9px 16px; background:transparent; color:var(--ink);
+  cursor:pointer; font-family:inherit; font-size:.88rem; border-radius:2px; transition:all .15s;
 }
-.bk-slot:hover{ border-color:var(--accent); }
-.bk-slot.active{ border-color:var(--accent); color:var(--accent); }
-.bk-summary{ margin-bottom:20px; padding:14px 16px; border:1px solid var(--line); background:var(--bg); font-size:.95rem; }
+.bk-slot:hover{ border-color:var(--accent); color:var(--accent); }
+.bk-slot.active{ border-color:var(--accent); background:var(--accent); color:#fff; }
+
+/* Details form */
+.bk-summary{
+  margin-bottom:24px; padding:14px 16px; border:1px solid var(--line);
+  background:var(--bg); font-size:.92rem; border-radius:2px;
+}
+.bk-summary strong{ color:var(--accent); }
+.bk-form-row{ margin-bottom:16px; }
+.bk-form-row label{ font-size:.75rem; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:7px; display:block; }
+.bk-field{ border-radius:2px; }
+
+/* Messages */
 .bk-msg{ color:var(--muted); font-size:.88rem; margin-top:14px; }
 .bk-msg.error{ color:var(--accent); }
-.bk-back{ background:none; border:0; color:var(--muted); text-decoration:underline; cursor:pointer; font-size:.8rem; margin-bottom:18px; padding:0; font-family:inherit; }
+.bk-back{
+  background:none; border:0; color:var(--muted); cursor:pointer; font-size:.82rem;
+  margin-bottom:22px; padding:0; font-family:inherit; display:flex; align-items:center; gap:4px;
+}
+.bk-back:hover{ color:var(--ink); }
+
+/* Done state */
 .bk-done{ text-align:center; padding:20px 0; }
-.bk-done h3{ font-size:1.6rem; margin-bottom:10px; }
-.bk-done p{ color:var(--muted); }
+.bk-done h3{ font-size:1.5rem; margin-bottom:10px; }
+.bk-done p{ color:var(--muted); margin-bottom:8px; }
+.bk-done .check{ font-size:2.5rem; margin-bottom:16px; }
+
+@media(max-width:500px){
+  .booking{ padding:24px 18px; }
+  .bk-services{ grid-template-columns:1fr; }
+  .bk-step-lbl{ display:none; }
+}
 
 /* KONTAKTI / BOOKING */
 #kontakti{
@@ -598,6 +653,22 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
     <div class="sec-head reveal"><span class="eyebrow">Pieraksts</span><h2>Rezervē savu laiku</h2></div>
     <div class="booking reveal" id="booking">
 
+      <!-- Soļu indikators -->
+      <div class="bk-steps" id="bkStepBar">
+        <div class="bk-step-dot active" data-for="service,mode">
+          <div class="bk-step-num">1</div>
+          <div class="bk-step-lbl">Pakalpojums</div>
+        </div>
+        <div class="bk-step-dot" data-for="pick">
+          <div class="bk-step-num">2</div>
+          <div class="bk-step-lbl">Laiks</div>
+        </div>
+        <div class="bk-step-dot" data-for="details">
+          <div class="bk-step-num">3</div>
+          <div class="bk-step-lbl">Dati</div>
+        </div>
+      </div>
+
       <div class="bk-step" data-step="service">
         <div class="bk-services" id="bkServices">
           <div class="bk-msg">Ielādē pakalpojumus…</div>
@@ -614,7 +685,9 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
 
       <div class="bk-step" data-step="pick" hidden>
         <button type="button" class="bk-back" data-back="mode">← Atpakaļ</button>
+        <label class="bk-label">Izvēlies dienu</label>
         <select class="bk-field" id="bkDate"></select>
+        <label class="bk-label" style="margin-top:18px;">Pieejamie laiki</label>
         <div class="bk-slots" id="bkSlots"></div>
       </div>
 
@@ -622,9 +695,15 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
         <button type="button" class="bk-back" data-back="mode">← Atpakaļ</button>
         <div class="bk-summary" id="bkSummary"></div>
         <form id="bkForm">
-          <input class="bk-field" type="text" id="bkName" placeholder="Vārds" required maxlength="100" autocomplete="name">
-          <input class="bk-field" type="tel" id="bkPhone" placeholder="Telefona numurs" required maxlength="30" autocomplete="tel">
-          <button type="submit" class="btn btn-accent">Apstiprināt pierakstu</button>
+          <div class="bk-form-row">
+            <label for="bkName">Tavs vārds</label>
+            <input class="bk-field" type="text" id="bkName" placeholder="Piem. Jānis" required maxlength="100" autocomplete="name">
+          </div>
+          <div class="bk-form-row">
+            <label for="bkPhone">Telefona numurs</label>
+            <input class="bk-field" type="tel" id="bkPhone" placeholder="+371 2x xxx xxx" required maxlength="30" autocomplete="tel">
+          </div>
+          <button type="submit" class="btn btn-accent" style="width:100%;text-align:center;">Apstiprināt pierakstu</button>
         </form>
       </div>
 
@@ -743,11 +822,25 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 
   const state = { services: [], service: null, mode: null, startsAtIso: null };
 
+  const stepOrder = ['service', 'mode', 'pick', 'details', 'done'];
   function showStep(name) {
     root.querySelectorAll('.bk-step').forEach((el) => {
       el.hidden = el.dataset.step !== name;
     });
     els.error.hidden = true;
+    // Update step indicator
+    const stepBar = document.getElementById('bkStepBar');
+    if (stepBar) {
+      const idx = stepOrder.indexOf(name);
+      stepBar.querySelectorAll('.bk-step-dot').forEach((dot, i) => {
+        const forSteps = (dot.dataset.for || '').split(',');
+        const dotIdx = stepOrder.indexOf(forSteps[0]);
+        dot.classList.remove('active', 'done');
+        if (forSteps.includes(name)) dot.classList.add('active');
+        else if (dotIdx < idx) dot.classList.add('done');
+      });
+      stepBar.hidden = name === 'done';
+    }
   }
 
   function showError(msg) {
@@ -790,7 +883,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'bk-service';
-      btn.innerHTML = `<div class="nm">${s.name}</div><div class="meta">€${s.priceEur} · ${s.durationMin} min</div>`;
+      btn.innerHTML = `<div class="nm">${s.name}</div><div class="price">€${s.priceEur}</div><div class="dur">${s.durationMin} min</div>`;
       btn.addEventListener('click', () => selectService(s, btn));
       els.services.appendChild(btn);
     });
@@ -812,7 +905,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       const data = await res.json();
       if (!res.ok || !data.slot) throw new Error('no slot');
       state.startsAtIso = data.slot;
-      els.summary.textContent = `${state.service.name} · €${state.service.priceEur} · ${fmtDayTime(data.slot)}`;
+      els.summary.innerHTML = `<strong>${state.service.name}</strong> · €${state.service.priceEur}<br>${fmtDayTime(data.slot)}`;
       showStep('details');
     } catch {
       showError('Rezervāciju sistēma īslaicīgi nav pieejama. Pamēģini vēlreiz vai zvani +371 24118068.');
@@ -855,7 +948,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         btn.textContent = fmtTime(iso);
         btn.addEventListener('click', () => {
           state.startsAtIso = iso;
-          els.summary.textContent = `${state.service.name} · €${state.service.priceEur} · ${fmtDayTime(iso)}`;
+          els.summary.innerHTML = `<strong>${state.service.name}</strong> · €${state.service.priceEur}<br>${fmtDayTime(iso)}`;
           showStep('details');
         });
         els.slots.appendChild(btn);
@@ -893,7 +986,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         }
         return;
       }
-      els.done.innerHTML = `<h3>Pierakstīts.</h3><p>${data.appointment.serviceName} · €${data.appointment.priceEur}<br>${fmtDayTime(data.appointment.startsAt)}</p><p>Gaidīsim tevi Kotānā, Rēzeknē.</p>`;
+      els.done.innerHTML = `<div class="check">✓</div><h3>Pierakstīts!</h3><p><strong>${data.appointment.serviceName}</strong> · €${data.appointment.priceEur}</p><p>${fmtDayTime(data.appointment.startsAt)}</p><p style="margin-top:16px;">Gaidīsim tevi Kotānā, Rēzeknē.</p>`;
       showStep('done');
     } catch {
       showError('Rezervāciju sistēma īslaicīgi nav pieejama. Pamēģini vēlreiz vai zvani +371 24118068.');

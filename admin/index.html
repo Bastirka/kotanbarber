@@ -3,61 +3,191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kotāns — Pieraksti (admin)</title>
+<title>Kotāns — Pieraksti</title>
 <style>
-  :root{ --bg:#0a0a0a; --bg-soft:#121212; --ink:#f4f1ea; --muted:#8a8a86; --line:#262626; --accent:#d92b3a; }
-  *{ box-sizing:border-box; }
-  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,Manrope,sans-serif; padding:24px; }
-  h1{ font-size:1.4rem; margin:0 0 20px; }
-  h2{ font-size:1.05rem; margin:0 0 12px; }
-  #gate{ max-width:340px; margin:80px auto; text-align:center; }
-  #gate input{ width:100%; padding:12px; margin:12px 0; background:var(--bg-soft); border:1px solid var(--line); color:var(--ink); border-radius:6px; }
-  #gate button, .row button, #addForm button{ background:var(--accent); color:#fff; border:0; padding:10px 16px; border-radius:6px; cursor:pointer; font-weight:600; }
-  #app{ display:none; max-width:720px; margin:0 auto; }
-  .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 16px; border:1px solid var(--line); border-radius:8px; margin-bottom:10px; background:var(--bg-soft); }
-  .row .when{ font-weight:700; }
-  .row .who{ color:var(--muted); font-size:.85rem; }
-  .row button{ background:transparent; border:1px solid var(--accent); color:var(--accent); }
-  .empty{ color:var(--muted); text-align:center; margin-top:40px; }
-  .card{ border:1px solid var(--line); border-radius:8px; background:var(--bg-soft); padding:18px; margin-bottom:26px; }
-  #addForm{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  #addForm input, #addForm select{ width:100%; padding:10px; background:var(--bg); border:1px solid var(--line); color:var(--ink); border-radius:6px; font-family:inherit; }
-  #addForm button{ grid-column:1 / -1; }
-  #addMsg{ grid-column:1 / -1; font-size:.85rem; color:var(--muted); }
+  :root{
+    --bg:#f5f5f5;
+    --white:#ffffff;
+    --ink:#111111;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --accent:#d92b3a;
+    --accent-soft:#fef2f2;
+    --green:#16a34a;
+    --green-soft:#f0fdf4;
+    --radius:12px;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; }
+
+  /* LOGIN */
+  #gate{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .gate-card{
+    background:var(--white); border-radius:var(--radius); padding:40px 32px; width:100%; max-width:360px;
+    box-shadow:0 4px 24px rgba(0,0,0,.08);
+  }
+  .gate-logo{ font-size:1.6rem; font-weight:800; letter-spacing:-1px; margin-bottom:8px; }
+  .gate-logo span{ color:var(--accent); }
+  .gate-sub{ color:var(--muted); font-size:.9rem; margin-bottom:28px; }
+  .field-label{ font-size:.8rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; display:block; }
+  .field-input{
+    width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:8px;
+    font-size:.95rem; color:var(--ink); background:var(--white); outline:none; transition:border-color .15s;
+  }
+  .field-input:focus{ border-color:var(--accent); }
+  .btn-primary{
+    width:100%; padding:13px; background:var(--accent); color:#fff; border:0; border-radius:8px;
+    font-size:.95rem; font-weight:700; cursor:pointer; margin-top:16px; transition:opacity .15s;
+  }
+  .btn-primary:hover{ opacity:.88; }
+
+  /* APP LAYOUT */
+  #app{ display:none; }
+  .topbar{
+    background:var(--white); border-bottom:1px solid var(--line); padding:0 24px;
+    display:flex; align-items:center; justify-content:space-between; height:56px; position:sticky; top:0; z-index:10;
+  }
+  .topbar-logo{ font-weight:800; font-size:1.1rem; letter-spacing:-.5px; }
+  .topbar-logo span{ color:var(--accent); }
+  .topbar-logout{ font-size:.82rem; color:var(--muted); cursor:pointer; background:none; border:0; }
+  .topbar-logout:hover{ color:var(--ink); }
+
+  .main{ max-width:800px; margin:0 auto; padding:24px 16px 60px; }
+
+  /* ADD FORM */
+  .section-title{ font-size:1rem; font-weight:700; margin-bottom:14px; }
+  .add-card{
+    background:var(--white); border-radius:var(--radius); padding:20px; margin-bottom:28px;
+    box-shadow:0 1px 4px rgba(0,0,0,.06);
+  }
+  .add-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .add-grid .span2{ grid-column:1/-1; }
+  .field-wrap{ display:flex; flex-direction:column; }
+  select.field-input{ appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:32px; }
+  #addMsg{ font-size:.85rem; margin-top:4px; color:var(--muted); }
+  #addMsg.ok{ color:var(--green); }
   #addMsg.error{ color:var(--accent); }
+
+  /* APPOINTMENTS */
+  .appt-card{
+    background:var(--white); border-radius:var(--radius); padding:16px 18px;
+    margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06);
+    display:flex; align-items:center; gap:14px;
+  }
+  .appt-time-block{
+    min-width:70px; text-align:center; background:var(--accent-soft);
+    border-radius:8px; padding:8px 6px;
+  }
+  .appt-time-block .hour{ font-size:1.25rem; font-weight:800; color:var(--accent); line-height:1; }
+  .appt-time-block .date{ font-size:.7rem; color:var(--accent); margin-top:3px; }
+  .appt-info{ flex:1; }
+  .appt-service{ font-weight:700; font-size:.95rem; }
+  .appt-client{ color:var(--muted); font-size:.85rem; margin-top:3px; }
+  .appt-badge{
+    font-size:.72rem; font-weight:700; padding:2px 7px; border-radius:20px; text-transform:uppercase; letter-spacing:.3px;
+  }
+  .badge-queue{ background:#fef9c3; color:#a16207; }
+  .badge-scheduled{ background:#eff6ff; color:#1d4ed8; }
+  .badge-web{ background:#f0fdf4; color:#15803d; }
+  .appt-cancel{
+    background:none; border:1.5px solid var(--line); color:var(--muted); border-radius:8px;
+    padding:8px 12px; cursor:pointer; font-size:.82rem; white-space:nowrap; transition:all .15s;
+  }
+  .appt-cancel:hover{ border-color:var(--accent); color:var(--accent); }
+  .empty-state{ text-align:center; padding:48px 16px; color:var(--muted); }
+  .empty-icon{ font-size:2.5rem; margin-bottom:10px; }
+
+  /* SECTION HEADER */
+  .section-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .appt-count{ font-size:.82rem; color:var(--muted); background:var(--bg); padding:4px 10px; border-radius:20px; }
+
+  /* TOGGLE ADD FORM */
+  .add-toggle{
+    background:var(--accent); color:#fff; border:0; border-radius:8px;
+    padding:9px 16px; font-size:.85rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px;
+  }
+
+  @media(max-width:560px){
+    .add-grid{ grid-template-columns:1fr; }
+    .add-grid .span2{ grid-column:1; }
+    .appt-card{ flex-wrap:wrap; }
+    .appt-time-block{ min-width:60px; }
+    .topbar{ padding:0 16px; }
+  }
 </style>
 </head>
 <body>
 
 <div id="gate">
-  <h1>Kotāns — admin</h1>
-  <input id="token" type="password" placeholder="Admin tokens">
-  <button onclick="login()">Ieiet</button>
+  <div class="gate-card">
+    <div class="gate-logo">KOTĀNS<span>.</span></div>
+    <p class="gate-sub">Admin panelis</p>
+    <div class="field-wrap">
+      <label class="field-label" for="token">Parole</label>
+      <input class="field-input" id="token" type="password" placeholder="Ievadi admin paroli" onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <button class="btn-primary" onclick="login()">Ieiet</button>
+  </div>
 </div>
 
 <div id="app">
-  <h1>Kotāns — admin</h1>
-
-  <div class="card">
-    <h2>Pievienot esošu / manuālu pierakstu</h2>
-    <form id="addForm">
-      <select id="addService"></select>
-      <input id="addName" type="text" placeholder="Vārds" required>
-      <input id="addDate" type="date" required>
-      <input id="addTime" type="time" required>
-      <input id="addPhone" type="tel" placeholder="Telefons (nav obligāts)">
-      <button type="submit">Pievienot</button>
-      <div id="addMsg"></div>
-    </form>
+  <div class="topbar">
+    <div class="topbar-logo">KOTĀNS<span>.</span></div>
+    <button class="topbar-logout" onclick="logout()">Iziet</button>
   </div>
 
-  <h2>Gaidāmie pieraksti</h2>
-  <div id="list"></div>
+  <div class="main">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h1 style="font-size:1.3rem;font-weight:800;">Pieraksti</h1>
+      <button class="add-toggle" onclick="toggleAdd()">+ Pievienot</button>
+    </div>
+
+    <div class="add-card" id="addCard" style="display:none;">
+      <div class="section-title">Manuāls pieraksts</div>
+      <form id="addForm">
+        <div class="add-grid">
+          <div class="field-wrap span2">
+            <label class="field-label">Pakalpojums</label>
+            <select class="field-input" id="addService"></select>
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Vārds</label>
+            <input class="field-input" id="addName" type="text" placeholder="Klients" required autocomplete="off">
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Telefons (nav obligāts)</label>
+            <input class="field-input" id="addPhone" type="tel" placeholder="+371 2x xxx xxx" autocomplete="off">
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Datums</label>
+            <input class="field-input" id="addDate" type="date" required>
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Laiks</label>
+            <input class="field-input" id="addTime" type="time" required>
+          </div>
+          <div class="span2" style="display:flex;gap:10px;align-items:center;margin-top:4px;">
+            <button type="submit" class="btn-primary" style="margin-top:0;">Pievienot pierakstu</button>
+            <div id="addMsg"></div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title" style="margin-bottom:0;">Gaidāmie pieraksti</div>
+      <div class="appt-count" id="apptCount"></div>
+    </div>
+    <div id="list"></div>
+  </div>
 </div>
 
 <script>
 let token = localStorage.getItem('kotan_admin_token') || '';
 let services = [];
+let addOpen = false;
 
 function login() {
   token = document.getElementById('token').value.trim();
@@ -66,11 +196,23 @@ function login() {
   boot();
 }
 
+function logout() {
+  localStorage.removeItem('kotan_admin_token');
+  token = '';
+  document.getElementById('gate').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function toggleAdd() {
+  addOpen = !addOpen;
+  document.getElementById('addCard').style.display = addOpen ? 'block' : 'none';
+}
+
 async function boot() {
   const res = await fetch('/api/admin/appointments?days=14', { headers: { 'X-Admin-Token': token } });
   if (!res.ok) {
     localStorage.removeItem('kotan_admin_token');
-    document.getElementById('gate').style.display = 'block';
+    document.getElementById('gate').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
     return;
   }
@@ -87,29 +229,46 @@ async function loadServices() {
   const data = await res.json();
   services = data.services;
   const sel = document.getElementById('addService');
-  sel.innerHTML = services.map((s) => `<option value="${s.id}">${s.name} · ${s.durationMin} min</option>`).join('');
+  sel.innerHTML = services.map((s) => `<option value="${s.id}">${s.name} · ${s.durationMin} min · €${s.priceEur}</option>`).join('');
 }
 
 function render(list) {
   const el = document.getElementById('list');
+  const count = document.getElementById('apptCount');
+  count.textContent = list.length ? `${list.length} pieraksts${list.length > 1 ? 'i' : ''}` : '';
+
   if (list.length === 0) {
-    el.innerHTML = '<div class="empty">Nav gaidāmu pierakstu.</div>';
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div>Nav gaidāmu pierakstu</div></div>';
     return;
   }
-  const fmt = (iso) => new Intl.DateTimeFormat('lv-LV', {
-    timeZone: 'Europe/Riga', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
-  }).format(new Date(iso));
-  const srcLabel = { queue: 'rinda', scheduled: 'grafiks' };
 
-  el.innerHTML = list.map((a) => `
-    <div class="row">
-      <div>
-        <div class="when">${fmt(a.starts_at)} · ${a.service_name}</div>
-        <div class="who">${a.client_name}${a.telegram_username ? ' · @' + a.telegram_username : ''} · €${a.price_eur} · ${srcLabel[a.mode] || a.mode}</div>
+  const fmtHour = (iso) => new Intl.DateTimeFormat('lv-LV', {
+    timeZone: 'Europe/Riga', hour: '2-digit', minute: '2-digit',
+  }).format(new Date(iso));
+  const fmtDate = (iso) => new Intl.DateTimeFormat('lv-LV', {
+    timeZone: 'Europe/Riga', weekday: 'short', day: '2-digit', month: '2-digit',
+  }).format(new Date(iso));
+
+  const badges = { queue: ['badge-queue','rinda'], scheduled: ['badge-scheduled','grafiks'], web: ['badge-web','lapa'] };
+
+  el.innerHTML = list.map((a) => {
+    const src = a.source || a.mode;
+    const [bClass, bLabel] = badges[src] || badges[a.mode] || ['badge-web', src];
+    const phone = a.phone ? `· ${a.phone}` : '';
+    const tg = a.telegram_username ? `· @${a.telegram_username}` : '';
+    return `
+    <div class="appt-card">
+      <div class="appt-time-block">
+        <div class="hour">${fmtHour(a.starts_at)}</div>
+        <div class="date">${fmtDate(a.starts_at)}</div>
       </div>
-      <button onclick="cancelAppt(${a.id})">Atcelt</button>
-    </div>
-  `).join('');
+      <div class="appt-info">
+        <div class="appt-service">${a.service_name} <span class="appt-badge ${bClass}">${bLabel}</span></div>
+        <div class="appt-client">${a.client_name}${tg}${phone} · €${a.price_eur}</div>
+      </div>
+      <button class="appt-cancel" onclick="cancelAppt(${a.id})">Atcelt</button>
+    </div>`;
+  }).join('');
 }
 
 async function cancelAppt(id) {
@@ -136,15 +295,11 @@ document.getElementById('addForm').addEventListener('submit', async (ev) => {
 
   if (!serviceId || !clientName || !date || !time) {
     msg.className = 'error';
-    msg.textContent = 'Aizpildi pakalpojumu, vārdu, datumu un laiku.';
+    msg.textContent = 'Aizpildi visus laukus.';
     return;
   }
 
-  // date+time are entered in the admin's own local time; the browser's
-  // Date parses them as local wall-clock, which is correct as long as the
-  // barber is in Rīga when using this panel.
   const startsAt = new Date(`${date}T${time}:00`);
-
   const res = await fetch('/api/admin/create', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
@@ -156,13 +311,15 @@ document.getElementById('addForm').addEventListener('submit', async (ev) => {
     msg.textContent = data.error || 'Neizdevās pievienot.';
     return;
   }
-  msg.textContent = 'Pievienots.';
+  msg.className = 'ok';
+  msg.textContent = '✓ Pievienots';
   document.getElementById('addForm').reset();
+  setTimeout(() => { msg.textContent = ''; }, 3000);
   boot();
 });
 
 if (token) boot();
-else document.getElementById('gate').style.display = 'block';
+else document.getElementById('gate').style.display = 'flex';
 </script>
 </body>
 </html>
