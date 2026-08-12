@@ -8,6 +8,9 @@ function checkAuth(req) {
 module.exports = async (req, res) => {
   if (!checkAuth(req)) { res.status(401).json({ error: 'Unauthorized' }); return; }
 
+  // Ensure color column exists
+  await query(`ALTER TABLE barbers ADD COLUMN IF NOT EXISTS color TEXT NOT NULL DEFAULT '#d92b3a'`).catch(()=>{});
+
   if (req.method === 'GET') {
     const { rows } = await query('SELECT * FROM barbers ORDER BY id');
     return res.status(200).json({ barbers: rows });
