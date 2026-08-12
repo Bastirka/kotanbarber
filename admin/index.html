@@ -272,6 +272,14 @@
         <div class="section-title">Meistari</div>
         <button class="add-toggle" onclick="toggleAddBarber()">+ Pievienot</button>
       </div>
+      <div class="card" style="background:#fffbeb;border:1.5px solid #fde68a;margin-bottom:12px;">
+        <div style="font-weight:700;margin-bottom:6px;font-size:.9rem;">📱 Kā uzzināt savu Telegram Chat ID?</div>
+        <div style="font-size:.85rem;color:#374151;line-height:1.6;">
+          1. Atver Telegram un atrod botu <strong><a href="https://t.me/userinfobot" target="_blank" style="color:var(--accent);">@userinfobot</a></strong><br>
+          2. Nosūti tam jebko (piem. <code style="background:#f3f4f6;padding:1px 5px;border-radius:3px;">/start</code>)<br>
+          3. Bots atbildēs ar tavu <strong>Id:</strong> numuru — iekopē to zemāk
+        </div>
+      </div>
       <div class="card add-form-card" id="addBarberCard">
         <div class="card-title">Jauns meistars</div>
         <div class="form-grid">
@@ -281,7 +289,7 @@
           </div>
           <div class="inp-group">
             <label class="lbl">Telegram Chat ID</label>
-            <input class="inp" id="bTgId" type="text" placeholder="1215911050">
+            <input class="inp" id="bTgId" type="text" placeholder="piem. 1215911050">
           </div>
           <div class="span2" style="display:flex;align-items:center;gap:12px;">
             <button class="btn-sm btn-red" style="padding:10px 20px;" onclick="addBarber()">Pievienot</button>
