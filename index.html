@@ -636,7 +636,7 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
 <section id="galerija">
   <div class="wrap">
     <div class="sec-head reveal"><span class="eyebrow">Darbi</span><h2>Galerija</h2></div>
-    <div class="gallery reveal">
+    <div class="gallery reveal" id="galleryGrid">
       <div class="tile big tile-photo-1" data-label="Telpas sajūta"></div>
       <div class="tile tile-photo-2" data-label="Fade"></div>
       <div class="tile tile-photo-3" data-label="Bārda"></div>
@@ -1006,6 +1006,22 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   });
 
   loadServices();
+})();
+
+/* ====== GALERIJA no API ====== */
+(async () => {
+  try {
+    const res = await fetch('/api/gallery');
+    if (!res.ok) return;
+    const { images } = await res.json();
+    if (!images || !images.length) return;
+    const grid = document.getElementById('galleryGrid');
+    if (!grid) return;
+    grid.innerHTML = images.map((img, i) => {
+      const big = i === 0 || i === 4;
+      return `<div class="tile${big?' big':''}" data-label="${img.label||''}" style="background:url('${img.url}') center/cover;"></div>`;
+    }).join('');
+  } catch {}
 })();
 </script>
 </body>

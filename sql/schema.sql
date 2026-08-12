@@ -66,6 +66,25 @@ ON CONFLICT (key) DO NOTHING;
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS barber_id INTEGER REFERENCES barbers(id);
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS final_price_eur NUMERIC(6,2);
 
+-- Gallery images
+CREATE TABLE IF NOT EXISTS gallery_images (
+  id         SERIAL PRIMARY KEY,
+  url        TEXT NOT NULL,
+  label      TEXT NOT NULL DEFAULT '',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  active     BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+INSERT INTO gallery_images (url, label, sort_order) VALUES
+  ('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=900&q=80', 'Telpas sajūta', 1),
+  ('https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=600&q=80', 'Fade', 2),
+  ('https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&w=600&q=80', 'Bārda', 3),
+  ('https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80', 'Krēsls', 4),
+  ('https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=600&q=80', 'Rokraksts', 5),
+  ('https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?auto=format&fit=crop&w=600&q=80', 'Ikdiena', 6)
+ON CONFLICT DO NOTHING;
+
 INSERT INTO services (name, duration_min, price_eur, sort_order) VALUES
   ('Matu griezums',        30, 15, 1),
   ('Griezums + bārda',     45, 22, 2),

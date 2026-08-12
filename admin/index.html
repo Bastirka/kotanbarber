@@ -140,6 +140,18 @@
     .tbl-wrap{ display:block; }
   }
 
+  /* GALERIJA */
+  .gal-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+  .gal-item{ background:var(--white); border-radius:var(--r); overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+  .gal-img{ width:100%; height:140px; object-fit:cover; background:#f0f0f0; display:block; }
+  .gal-img-placeholder{ width:100%; height:140px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; font-size:2rem; color:#ccc; }
+  .gal-info{ padding:10px 12px; }
+  .gal-label{ font-size:.85rem; font-weight:600; margin-bottom:4px; }
+  .gal-url{ font-size:.72rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:8px; }
+  .gal-btns{ display:flex; gap:6px; }
+  .gal-btns button{ flex:1; }
+  @media(max-width:600px){ .gal-grid{ grid-template-columns:repeat(2,1fr); } }
+
   /* GRAFIKS */
   .cal-nav{ display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
   .cal-nav-btn{ background:var(--white); border:1.5px solid var(--line); border-radius:7px; padding:8px 14px; font-size:.85rem; font-weight:600; cursor:pointer; }
@@ -198,6 +210,7 @@
     <button class="tab" onclick="switchTab('schedule')">Grafiks</button>
     <button class="tab" onclick="switchTab('barbers')">Meistari</button>
     <button class="tab" onclick="switchTab('services')">Pakalpojumi</button>
+    <button class="tab" onclick="switchTab('gallery')">Galerija</button>
     <button class="tab" onclick="switchTab('pricing')">Cenu iestatījumi</button>
   </div>
 
@@ -332,6 +345,33 @@
         </table>
       </div>
       <div class="svc-cards" id="svcCards"></div>
+    </div>
+
+    <!-- ── GALERIJA ── -->
+    <div class="panel" id="panel-gallery">
+      <div class="section-header">
+        <div class="section-title">Galerijas bildes</div>
+        <button class="add-toggle" onclick="toggleAddGallery()">+ Pievienot</button>
+      </div>
+      <div class="card add-form-card" id="addGalleryCard">
+        <div class="card-title">Jauna bilde</div>
+        <div class="inp-group">
+          <label class="lbl">Bildes URL (saite uz bildi)</label>
+          <input class="inp" id="gUrl" type="url" placeholder="https://...">
+        </div>
+        <div style="font-size:.8rem;color:var(--muted);margin:-8px 0 12px;">
+          Var ielikt saiti no Instagram, Google Drive publiskas bildes, vai jebkuras citas lapas.
+        </div>
+        <div class="inp-group">
+          <label class="lbl">Apraksts (nav obligāts)</label>
+          <input class="inp" id="gLabel" type="text" placeholder="piem. Fade, Bārda…">
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="btn-sm btn-red" style="padding:10px 20px;" onclick="addGalleryImage()">Pievienot bildi</button>
+          <span class="msg" id="gMsg"></span>
+        </div>
+      </div>
+      <div id="galleryAdminList"></div>
     </div>
 
     <!-- ── CENU IESTATĪJUMI ── -->
@@ -716,6 +756,69 @@ async function saveSettings() {
   setTimeout(()=>msg.textContent='', 3000);
 }
 
+// ── GALERIJA ──────────────────────────────────────────────────────────────────
+let addGalleryOpen = false;
+function toggleAddGallery() {
+  addGalleryOpen = !addGalleryOpen;
+  document.getElementById('addGalleryCard').style.display = addGalleryOpen ? 'block' : 'none';
+}
+
+async function loadGallery() {
+  const res = await fetch('/api/admin/gallery', { headers:{'X-Admin-Token':token} });
+  if (!res.ok) return;
+  const { images } = await res.json();
+  const el = document.getElementById('galleryAdminList');
+  if (!images.length) { el.innerHTML='<div class="empty-state">Nav bilžu. Pievieno pirmo!</div>'; return; }
+  el.innerHTML = `<div class="gal-grid">${images.map(img => `
+    <div class="gal-item">
+      <img class="gal-img" src="${img.url}" onerror="this.style.display='none';this.nextSibling.style.display='flex';" loading="lazy">
+      <div class="gal-img-placeholder" style="display:none;">🖼</div>
+      <div class="gal-info">
+        <div class="gal-label">${img.label || '—'}</div>
+        <div class="gal-url" title="${img.url}">${img.url}</div>
+        <div class="gal-btns">
+          <button class="btn-sm btn-ghost" onclick="editGalleryLabel(${img.id}, '${(img.label||'').replace(/'/g,"\\'")}')">Labot</button>
+          <button class="btn-sm" style="background:#fee2e2;color:#b91c1c;border:0;" onclick="deleteGalleryImage(${img.id})">Dzēst</button>
+        </div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+async function addGalleryImage() {
+  const url   = document.getElementById('gUrl').value.trim();
+  const label = document.getElementById('gLabel').value.trim();
+  const msg   = document.getElementById('gMsg');
+  if (!url) { msg.className='msg err'; msg.textContent='Ievadi bildes saiti.'; return; }
+  const res = await fetch('/api/admin/gallery', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ url, label }),
+  });
+  if (!res.ok) { msg.className='msg err'; msg.textContent='Kļūda.'; return; }
+  msg.className='msg ok'; msg.textContent='✓ Pievienota';
+  document.getElementById('gUrl').value='';
+  document.getElementById('gLabel').value='';
+  loadGallery();
+  setTimeout(()=>msg.textContent='', 3000);
+}
+
+async function deleteGalleryImage(id) {
+  if (!confirm('Dzēst šo bildi no galerijas?')) return;
+  await fetch(`/api/admin/gallery?id=${id}`, { method:'DELETE', headers:{'X-Admin-Token':token} });
+  loadGallery();
+}
+
+async function editGalleryLabel(id, currentLabel) {
+  const label = prompt('Apraksts:', currentLabel);
+  if (label === null) return;
+  await fetch(`/api/admin/gallery?id=${id}`, {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ label }),
+  });
+  loadGallery();
+}
+
 // ── GRAFIKS ───────────────────────────────────────────────────────────────────
 const CAL_START = 9;  // 09:00
 const CAL_END   = 19; // 19:00
@@ -817,13 +920,14 @@ async function renderCal() {
     </div>`;
 }
 
-// ── TABS (updated to include schedule) ────────────────────────────────────────
+// ── TABS ──────────────────────────────────────────────────────────────────────
 function switchTab(name) {
-  const names = ['appts','schedule','barbers','services','pricing'];
+  const names = ['appts','schedule','barbers','services','gallery','pricing'];
   document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', names[i] === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   if (name === 'schedule') renderCal();
+  if (name === 'gallery') loadGallery();
 }
 
 // ── START ─────────────────────────────────────────────────────────────────────
