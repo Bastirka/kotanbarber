@@ -139,6 +139,34 @@
     .svc-cards{ display:none; }
     .tbl-wrap{ display:block; }
   }
+
+  /* GRAFIKS */
+  .cal-nav{ display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .cal-nav-btn{ background:var(--white); border:1.5px solid var(--line); border-radius:7px; padding:8px 14px; font-size:.85rem; font-weight:600; cursor:pointer; }
+  .cal-nav-btn:hover{ border-color:var(--accent); color:var(--accent); }
+  .cal-date-label{ font-size:1rem; font-weight:700; flex:1; text-align:center; }
+  .cal-grid{ display:flex; gap:0; }
+  .cal-times{ display:flex; flex-direction:column; padding-top:0; min-width:46px; }
+  .cal-time-lbl{ height:40px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; font-size:.72rem; color:var(--muted); border-right:1px solid var(--line); }
+  .cal-col{ flex:1; min-width:0; }
+  .cal-col-header{ height:32px; display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:700; color:var(--muted); background:var(--bg); border-bottom:1px solid var(--line); border-radius:6px 6px 0 0; margin-bottom:0; }
+  .cal-slots{ position:relative; }
+  .cal-slot{ height:40px; border-bottom:1px solid var(--line); background:var(--white); position:relative; cursor:default; }
+  .cal-slot:last-child{ border-bottom:0; }
+  .cal-slot.half{ border-bottom:1px dashed #f0f0f0; }
+  .cal-appt{
+    position:absolute; left:2px; right:2px; border-radius:6px;
+    background:var(--accent); color:#fff; padding:4px 8px; overflow:hidden;
+    font-size:.75rem; font-weight:600; z-index:2; cursor:default;
+    box-shadow:0 2px 6px rgba(217,43,58,.3);
+  }
+  .cal-appt .cal-appt-name{ font-size:.72rem; font-weight:400; opacity:.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cal-free-hint{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:.7rem; color:#c9c9c9; pointer-events:none; }
+  .cal-cols{ display:flex; flex:1; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:0 0 8px 8px; overflow:hidden; }
+  .cal-cols > .cal-col{ background:var(--white); }
+  .cal-legend{ display:flex; gap:14px; margin-top:10px; font-size:.78rem; color:var(--muted); }
+  .cal-legend span{ display:flex; align-items:center; gap:5px; }
+  .cal-legend .dot{ width:10px; height:10px; border-radius:3px; }
 </style>
 </head>
 <body>
@@ -167,6 +195,7 @@
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('appts')">Pieraksti</button>
+    <button class="tab" onclick="switchTab('schedule')">Grafiks</button>
     <button class="tab" onclick="switchTab('barbers')">Meistari</button>
     <button class="tab" onclick="switchTab('services')">Pakalpojumi</button>
     <button class="tab" onclick="switchTab('pricing')">Cenu iestatījumi</button>
@@ -218,6 +247,23 @@
       </div>
 
       <div id="apptList"></div>
+    </div>
+
+    <!-- ── GRAFIKS ── -->
+    <div class="panel" id="panel-schedule">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calMove(-1)">← Iepriekšējā</button>
+        <div class="cal-date-label" id="calLabel"></div>
+        <button class="cal-nav-btn" onclick="calMove(1)">Nākamā →</button>
+        <button class="cal-nav-btn" onclick="calToday()">Šodiena</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div id="calGrid"></div>
+      </div>
+      <div class="cal-legend">
+        <span><div class="dot" style="background:var(--accent);"></div> Aizņemts</span>
+        <span><div class="dot" style="background:#f0f0f0;border:1px solid #e0e0e0;"></div> Brīvs</span>
+      </div>
     </div>
 
     <!-- ── MEISTARI ── -->
@@ -354,14 +400,6 @@ async function boot() {
 }
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    const names = ['appts','barbers','services','pricing'];
-    t.classList.toggle('active', names[i] === name);
-  });
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-}
 
 // ── APPOINTMENTS ──────────────────────────────────────────────────────────────
 function toggleAdd() {
@@ -670,6 +708,116 @@ async function saveSettings() {
   msg.className = res.ok ? 'msg ok' : 'msg err';
   msg.textContent = res.ok ? '✓ Saglabāts' : 'Kļūda';
   setTimeout(()=>msg.textContent='', 3000);
+}
+
+// ── GRAFIKS ───────────────────────────────────────────────────────────────────
+const CAL_START = 9;  // 09:00
+const CAL_END   = 19; // 19:00
+const SLOT_H    = 30; // minutes per row
+let calDate = new Date();
+
+function calDateStr(d) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone:'Europe/Riga' }).format(d);
+}
+function calMove(delta) {
+  calDate = new Date(calDate.getTime() + delta * 86400000);
+  renderCal();
+}
+function calToday() {
+  calDate = new Date();
+  renderCal();
+}
+
+async function renderCal() {
+  const dateStr = calDateStr(calDate);
+  const label   = new Intl.DateTimeFormat('lv-LV', {
+    timeZone:'Europe/Riga', weekday:'long', day:'numeric', month:'long'
+  }).format(calDate);
+  document.getElementById('calLabel').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+
+  const from = new Date(dateStr + 'T00:00:00+03:00').toISOString();
+  const res  = await fetch(`/api/admin/appointments?from=${encodeURIComponent(from)}&days=1`, {
+    headers:{'X-Admin-Token':token}
+  });
+  if (!res.ok) return;
+  const { appointments } = await res.json();
+
+  // Build slot grid
+  const slots = [];
+  for (let h = CAL_START; h < CAL_END; h++) {
+    for (let m = 0; m < 60; m += SLOT_H) {
+      slots.push({ h, m, label: `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}` });
+    }
+  }
+
+  // Map appointments to slot positions
+  function slotIdx(isoTime) {
+    const d = new Date(isoTime);
+    const hh = parseInt(new Intl.DateTimeFormat('en-US',{timeZone:'Europe/Riga',hour:'numeric',hour12:false}).format(d), 10);
+    const mm = d.getMinutes ? (() => {
+      const parts = new Intl.DateTimeFormat('en-US',{timeZone:'Europe/Riga',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d);
+      return parseInt(parts.find(p=>p.type==='minute').value, 10);
+    })() : 0;
+    return Math.round(((hh - CAL_START) * 60 + mm) / SLOT_H);
+  }
+
+  const SLOT_PX = 40;
+  const totalSlots = slots.length;
+
+  // Which slots are taken (by how many appointments)
+  const taken = new Array(totalSlots).fill(null);
+  appointments.forEach(a => {
+    const s = slotIdx(a.starts_at);
+    const e = slotIdx(a.ends_at);
+    for (let i = s; i < e && i < totalSlots; i++) {
+      if (!taken[i]) taken[i] = a;
+    }
+  });
+
+  // Build a single column (no per-barber split for simplicity)
+  let slotsHtml = '';
+  let skip = 0;
+  slots.forEach((sl, i) => {
+    if (skip > 0) { skip--; return; }
+    const appt = taken[i];
+    if (appt) {
+      // Count consecutive slots for this appointment
+      let span = 1;
+      while (i + span < totalSlots && taken[i + span] === appt) span++;
+      skip = span - 1;
+      const fmtTime = iso => new Intl.DateTimeFormat('lv-LV',{timeZone:'Europe/Riga',hour:'2-digit',minute:'2-digit'}).format(new Date(iso));
+      slotsHtml += `
+        <div style="height:${span*SLOT_PX}px;position:relative;border-bottom:1px solid var(--line);">
+          <div style="position:absolute;inset:3px;background:var(--accent);border-radius:6px;padding:5px 8px;color:#fff;overflow:hidden;box-shadow:0 2px 6px rgba(217,43,58,.25);">
+            <div style="font-weight:700;font-size:.8rem;">${fmtTime(appt.starts_at)}–${fmtTime(appt.ends_at)}</div>
+            <div style="font-size:.75rem;opacity:.95;">${appt.service_name}</div>
+            <div style="font-size:.72rem;opacity:.8;">${appt.client_name}${appt.phone?' · '+appt.phone:''}</div>
+          </div>
+        </div>`;
+    } else {
+      slotsHtml += `<div style="height:${SLOT_PX}px;border-bottom:1px solid #f0f0f0;background:var(--white);"></div>`;
+    }
+  });
+
+  // Time labels
+  const labelsHtml = slots.map(sl =>
+    `<div style="height:${SLOT_PX}px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:.7rem;color:var(--muted);border-right:1px solid var(--line);">${sl.m===0?sl.label:''}</div>`
+  ).join('');
+
+  document.getElementById('calGrid').innerHTML = `
+    <div style="display:flex;">
+      <div style="min-width:44px;">${labelsHtml}</div>
+      <div style="flex:1;min-width:0;">${slotsHtml}</div>
+    </div>`;
+}
+
+// ── TABS (updated to include schedule) ────────────────────────────────────────
+function switchTab(name) {
+  const names = ['appts','schedule','barbers','services','pricing'];
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', names[i] === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'schedule') renderCal();
 }
 
 // ── START ─────────────────────────────────────────────────────────────────────
