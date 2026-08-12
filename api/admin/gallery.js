@@ -5,8 +5,21 @@ function checkAuth(req) {
   return token && req.headers['x-admin-token'] === token;
 }
 
+async function ensureTable() {
+  await query(`
+    CREATE TABLE IF NOT EXISTS gallery_images (
+      id         SERIAL PRIMARY KEY,
+      url        TEXT NOT NULL,
+      label      TEXT NOT NULL DEFAULT '',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      active     BOOLEAN NOT NULL DEFAULT true,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+}
+
 module.exports = async (req, res) => {
   if (!checkAuth(req)) { res.status(401).json({ error: 'Unauthorized' }); return; }
+  await ensureTable();
 
   if (req.method === 'GET') {
     const { rows } = await query('SELECT * FROM gallery_images ORDER BY sort_order, id');
