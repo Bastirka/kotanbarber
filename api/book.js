@@ -95,21 +95,35 @@ module.exports = async (req, res) => {
     },
   });
 
-  notifyAdmin(service, startsAt, name, phone);
+  notifyBarbers(service, startsAt, name, phone, result.appointment);
 };
 
 // Best-effort — a missing/misconfigured bot must never break a web booking.
-function notifyAdmin(service, startsAt, name, phone) {
-  if (!process.env.ADMIN_CHAT_ID || !process.env.TELEGRAM_BOT_TOKEN) return;
+async function notifyBarbers(service, startsAt, name, phone, appointment) {
+  if (!process.env.TELEGRAM_BOT_TOKEN) return;
   try {
     const { bot } = require('../lib/telegram');
+    const { query } = require('../lib/db');
     const when = new Intl.DateTimeFormat('lv-LV', {
       timeZone: 'Europe/Riga', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
     }).format(startsAt);
-    bot.telegram
-      .sendMessage(process.env.ADMIN_CHAT_ID, `Jauns pieraksts (lapa): ${service.name} · ${when} · ${name} · ${phone}`)
-      .catch(() => {});
+    const msg = `📅 Jauns pieraksts!\n${service.name} · ${when}\n👤 ${name} · ${phone}`;
+
+    const chatIds = new Set();
+
+    // Notify assigned barber
+    if (appointment.barber_id) {
+      const { rows } = await query('SELECT telegram_chat_id FROM barbers WHERE id = $1 AND active', [appointment.barber_id]).catch(() => ({ rows: [] }));
+      if (rows[0]?.telegram_chat_id) chatIds.add(rows[0].telegram_chat_id);
+    }
+
+    // Always notify main admin as fallback
+    if (process.env.ADMIN_CHAT_ID) chatIds.add(process.env.ADMIN_CHAT_ID);
+
+    for (const chatId of chatIds) {
+      bot.telegram.sendMessage(chatId, msg).catch(() => {});
+    }
   } catch {
-    // TELEGRAM_BOT_TOKEN missing/invalid — ignore, the booking itself already succeeded.
+    // ignore
   }
 }
