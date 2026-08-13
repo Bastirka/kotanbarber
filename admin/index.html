@@ -843,7 +843,7 @@ async function loadGallery() {
 
 let gMode = 'upload';
 let gFileBlob = null;
-let gFileInfo = null;
+let gFileName = null;
 
 function escHtml(value) {
   return String(value ?? '')
@@ -867,7 +867,7 @@ function gSwitchTab(tab) {
 function gFileSelected(input) {
   const file = input.files[0];
   if (!file) return;
-  gFileInfo = { name: file.name, type: file.type };
+  gFileName = file.name;
   const reader = new FileReader();
   reader.onload = e => {
     const img = new Image();
@@ -892,82 +892,71 @@ function gFileSelected(input) {
   reader.readAsDataURL(file);
 }
 
-async function addGalleryImage() {
+function addGalleryImage() {
   const label = document.getElementById('gLabel').value.trim();
   const msg   = document.getElementById('gMsg');
-  msg.className = 'msg'; msg.textContent = 'Augšupielādē…';
 
-  try {
-    let finalUrl;
-
-    if (gMode === 'upload') {
-      if (!gFileBlob) { msg.className='msg err'; msg.textContent='Izvēlies bildi.'; return; }
-
-      // 1. Iegūst upload tokenu no servera (ātra, maza pieprasījums)
-      const ext = (gFileInfo.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z]/g,'') || 'jpg';
-      const safeName = `gallery/${Date.now()}.${ext}`;
-      const tokenRes = await fetch('/api/admin/gallery-upload', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-admin-token': token },
-        body: JSON.stringify({
-          type: 'blob.generate-client-token',
-          payload: { pathname: safeName, callbackUrl: `${location.origin}/api/admin/gallery-upload`, multipart: false },
-        }),
-      });
-      if (!tokenRes.ok) { const e = await tokenRes.json(); throw new Error(e.error || 'Token kļūda'); }
-      const { clientToken } = await tokenRes.json();
-
-      // 2. Fails iet tieši uz Vercel Blob (neiet caur serveri)
-      msg.textContent = 'Augšupielādē uz Blob…';
-      const uploadRes = await fetch(`https://vercel.com/api/blob/${safeName}`, {
-        method: 'PUT',
-        headers: {
-          'authorization': `Bearer ${clientToken}`,
-          'x-api-version': '12',
-          'content-type': 'image/jpeg',
-          'x-content-length': String(gFileBlob.size),
-        },
-        body: gFileBlob,
-      });
-      if (!uploadRes.ok) { const e = await uploadRes.json().catch(()=>({})); throw new Error(e.error || `Blob kļūda ${uploadRes.status}`); }
-      const blob = await uploadRes.json();
-      finalUrl = blob.url;
-
-      // 3. Saglabā URL datubāzē
-      msg.textContent = 'Saglabā…';
-      const saveRes = await fetch('/api/admin/gallery', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-admin-token': token },
-        body: JSON.stringify({ url: finalUrl, label }),
-      });
-      if (!saveRes.ok) { const e = await saveRes.json(); throw new Error(e.error || 'DB kļūda'); }
-
-    } else {
-      const url = document.getElementById('gUrl').value.trim();
-      if (!url) { msg.className='msg err'; msg.textContent='Ievadi bildes saiti.'; return; }
-      const res = await fetch('/api/admin/gallery', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-admin-token': token },
-        body: JSON.stringify({ url, label }),
-      });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Kļūda'); }
-    }
-
-  } catch (err) {
-    msg.className = 'msg err';
-    msg.textContent = err.message || 'Kļūda';
+  if (gMode === 'url') {
+    const url = document.getElementById('gUrl').value.trim();
+    if (!url) { msg.className='msg err'; msg.textContent='Ievadi bildes saiti.'; return; }
+    fetch('/api/admin/gallery', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-admin-token': token },
+      body: JSON.stringify({ url, label }),
+    }).then(r => r.json()).then(data => {
+      if (data.error) { msg.className='msg err'; msg.textContent=data.error; return; }
+      msg.className='msg ok'; msg.textContent='✓ Pievienota';
+      document.getElementById('gUrl').value = '';
+      document.getElementById('gLabel').value = '';
+      loadGallery();
+      setTimeout(() => msg.textContent='', 3000);
+    });
     return;
   }
 
-  msg.className='msg ok'; msg.textContent='✓ Pievienota';
-  document.getElementById('gUrl') && (document.getElementById('gUrl').value='');
-  document.getElementById('gLabel').value='';
-  document.getElementById('gFile').value='';
-  document.getElementById('gPreviewWrap').style.display='none';
-  document.getElementById('gDropZone').style.borderColor='var(--line)';
-  gFileBlob = null; gFileInfo = null;
-  loadGallery();
-  setTimeout(()=>msg.textContent='', 3000);
+  if (!gFileBlob) { msg.className='msg err'; msg.textContent='Izvēlies bildi.'; return; }
+
+  const ext = (gFileName || 'photo.jpg').split('.').pop().replace(/[^a-z0-9]/gi,'') || 'jpg';
+  const fd = new FormData();
+  fd.append('file', gFileBlob, `${Date.now()}.${ext}`);
+  fd.append('label', label);
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/admin/gallery-upload');
+  xhr.setRequestHeader('x-admin-token', token);
+
+  xhr.upload.onprogress = e => {
+    if (e.lengthComputable) {
+      const pct = Math.round(e.loaded / e.total * 100);
+      msg.className = 'msg';
+      msg.textContent = `Augšupielādē… ${pct}%`;
+    }
+  };
+
+  xhr.onload = () => {
+    let data;
+    try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
+    if (xhr.status >= 400 || data.error) {
+      msg.className = 'msg err';
+      msg.textContent = data.error || `Kļūda ${xhr.status}`;
+      return;
+    }
+    msg.className = 'msg ok'; msg.textContent = '✓ Pievienota';
+    document.getElementById('gLabel').value = '';
+    document.getElementById('gFile').value = '';
+    document.getElementById('gPreviewWrap').style.display = 'none';
+    document.getElementById('gDropZone').style.borderColor = 'var(--line)';
+    gFileBlob = null; gFileName = null;
+    loadGallery();
+    setTimeout(() => msg.textContent = '', 3000);
+  };
+
+  xhr.onerror = () => { msg.className='msg err'; msg.textContent='Tīkla kļūda — pārbaudi savienojumu.'; };
+  xhr.ontimeout = () => { msg.className='msg err'; msg.textContent='Timeout — mēģini vēlreiz.'; };
+  xhr.timeout = 55000;
+
+  msg.className = 'msg'; msg.textContent = 'Augšupielādē… 0%';
+  xhr.send(fd);
 }
 
 async function deleteGalleryImage(id) {
