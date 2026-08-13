@@ -631,7 +631,7 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
 <section id="pakalpojumi">
   <div class="wrap">
     <div class="sec-head reveal"><span class="eyebrow">Cenrādis</span><h2>Pakalpojumi</h2></div>
-    <div class="services reveal">
+    <div class="services reveal" id="servicesGrid">
       <div class="service"><div class="service-info"><h3>Matu griezums</h3><p>Tīrs rezultāts, stilizēšana un īss saskaņojums uz vietas</p></div><div class="service-price">€15</div></div>
       <div class="service"><div class="service-info"><h3>Griezums + bārda</h3><p>Vienā reizē sakārto visu bez steigas un bez lieka trokšņa</p></div><div class="service-price">€22</div></div>
       <div class="service"><div class="service-info"><h3>Bārdas korekcija</h3><p>Kontūra, forma un kopšana ikdienai</p></div><div class="service-price">€10</div></div>
@@ -1030,6 +1030,21 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   });
 
   loadServices();
+})();
+
+/* ====== PAKALPOJUMI no API ====== */
+(async () => {
+  try {
+    const res = await fetch('/api/services');
+    if (!res.ok) return;
+    const { services } = await res.json();
+    if (!services || !services.length) return;
+    const grid = document.getElementById('servicesGrid');
+    if (!grid) return;
+    grid.innerHTML = services.map(s =>
+      `<div class="service"><div class="service-info"><h3>${s.name}</h3></div><div class="service-price">€${s.priceEur}</div></div>`
+    ).join('');
+  } catch {}
 })();
 
 /* ====== GALERIJA no API ====== */

@@ -148,6 +148,10 @@
   .gal-info{ padding:10px 12px; }
   .gal-label{ font-size:.85rem; font-weight:600; margin-bottom:4px; }
   .gal-url{ font-size:.72rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:8px; }
+  .gal-meta{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+  .gal-sort{ display:flex; align-items:center; gap:6px; font-size:.76rem; color:var(--muted); }
+  .gal-sort input{ width:68px; }
+  .gal-toggle{ display:flex; align-items:center; gap:6px; font-size:.76rem; color:var(--muted); }
   .gal-btns{ display:flex; gap:6px; }
   .gal-btns button{ flex:1; }
   @media(max-width:600px){ .gal-grid{ grid-template-columns:repeat(2,1fr); } }
@@ -462,6 +466,7 @@ async function boot() {
   loadBarbers();
   loadServicesTable();
   loadSettings();
+  loadGallery();
 }
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
@@ -812,13 +817,24 @@ async function loadGallery() {
   if (!images.length) { el.innerHTML='<div class="empty-state">Nav bilžu. Pievieno pirmo!</div>'; return; }
   el.innerHTML = `<div class="gal-grid">${images.map(img => `
     <div class="gal-item">
-      <img class="gal-img" src="${img.url}" onerror="this.style.display='none';this.nextSibling.style.display='flex';" loading="lazy">
+      <img class="gal-img" src="${escHtml(img.url)}" onerror="this.style.display='none';this.nextSibling.style.display='flex';" loading="lazy">
       <div class="gal-img-placeholder" style="display:none;">🖼</div>
       <div class="gal-info">
-        <div class="gal-label">${img.label || '—'}</div>
-        <div class="gal-url" title="${img.url}">${img.url}</div>
+        <div class="gal-label">${escHtml(img.label || '—')}</div>
+        <div class="gal-url" title="${escHtml(img.url)}">${escHtml(img.url)}</div>
+        <div class="gal-meta">
+          <label class="gal-toggle">
+            <input type="checkbox" id="gActive_${img.id}" ${img.active ? 'checked' : ''}>
+            Aktīvs
+          </label>
+          <label class="gal-sort">
+            Kārtība
+            <input class="inp" id="gSort_${img.id}" type="number" min="0" value="${img.sort_order || 0}" style="padding:6px 8px;">
+          </label>
+        </div>
         <div class="gal-btns">
-          <button class="btn-sm btn-ghost" onclick="editGalleryLabel(${img.id}, '${(img.label||'').replace(/'/g,"\\'")}')">Labot</button>
+          <button class="btn-sm btn-ghost" onclick="saveGalleryImage(${img.id})">Saglabāt</button>
+          <button class="btn-sm btn-ghost" onclick="editGalleryLabel(${img.id}, ${JSON.stringify(img.label || '').replace(/&/g,'&amp;').replace(/\"/g,'&quot;')})">Apraksts</button>
           <button class="btn-sm" style="background:#fee2e2;color:#b91c1c;border:0;" onclick="deleteGalleryImage(${img.id})">Dzēst</button>
         </div>
       </div>
@@ -828,6 +844,15 @@ async function loadGallery() {
 let gMode = 'upload';
 let gFileData = null;
 let gFileInfo = null;
+
+function escHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 function gSwitchTab(tab) {
   gMode = tab;
@@ -903,6 +928,17 @@ async function addGalleryImage() {
 async function deleteGalleryImage(id) {
   if (!confirm('Dzēst šo bildi no galerijas?')) return;
   await fetch(`/api/admin/gallery?id=${id}`, { method:'DELETE', headers:{'X-Admin-Token':token} });
+  loadGallery();
+}
+
+async function saveGalleryImage(id) {
+  const sortOrder = Number(document.getElementById(`gSort_${id}`).value);
+  const active = document.getElementById(`gActive_${id}`).checked;
+  await fetch(`/api/admin/gallery?id=${id}`, {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','X-Admin-Token':token},
+    body: JSON.stringify({ sort_order: Number.isFinite(sortOrder) ? sortOrder : 0, active }),
+  });
   loadGallery();
 }
 
