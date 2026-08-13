@@ -842,7 +842,7 @@ async function loadGallery() {
 }
 
 let gMode = 'upload';
-let gFileData = null;
+let gFileBlob = null;
 let gFileInfo = null;
 
 function escHtml(value) {
@@ -870,20 +870,20 @@ function gFileSelected(input) {
   gFileInfo = { name: file.name, type: file.type };
   const reader = new FileReader();
   reader.onload = e => {
-    // Compress via canvas
     const img = new Image();
     img.onload = () => {
-      const MAX = 1200;
+      const MAX = 1600;
       const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
       const canvas = document.createElement('canvas');
       canvas.width = Math.round(img.width * ratio);
       canvas.height = Math.round(img.height * ratio);
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      const compressed = canvas.toDataURL('image/jpeg', 0.78);
-      gFileData = compressed.split(',')[1];
-      // Preview
-      document.getElementById('gPreview').src = compressed;
-      document.getElementById('gFileName').textContent = `${file.name} → saspiests ${Math.round(gFileData.length * 0.75 / 1024)}KB`;
+      const preview = canvas.toDataURL('image/jpeg', 0.85);
+      document.getElementById('gPreview').src = preview;
+      canvas.toBlob(blob => {
+        gFileBlob = blob;
+        document.getElementById('gFileName').textContent = `${file.name} → ${Math.round(blob.size / 1024)}KB`;
+      }, 'image/jpeg', 0.85);
       document.getElementById('gPreviewWrap').style.display = 'block';
       document.getElementById('gDropZone').style.borderColor = 'var(--accent)';
     };
@@ -897,33 +897,64 @@ async function addGalleryImage() {
   const msg   = document.getElementById('gMsg');
   msg.className = 'msg'; msg.textContent = 'Augšupielādē…';
 
-  let body;
-  if (gMode === 'upload') {
-    if (!gFileData) { msg.className='msg err'; msg.textContent='Izvēlies bildi.'; return; }
-    body = { fileData: gFileData, fileName: gFileInfo.name, fileType: 'image/jpeg', label };
-  } else {
-    const url = document.getElementById('gUrl').value.trim();
-    if (!url) { msg.className='msg err'; msg.textContent='Ievadi bildes saiti.'; return; }
-    body = { url, label };
-  }
-
-  const ctrl = new AbortController();
-  const timeout = setTimeout(() => ctrl.abort(), 55000);
-
   try {
-    const res = await fetch('/api/admin/gallery', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-Admin-Token':token},
-      body: JSON.stringify(body),
-      signal: ctrl.signal,
-    });
-    clearTimeout(timeout);
-    const data = await res.json();
-    if (!res.ok) { msg.className='msg err'; msg.textContent=data.error||'Kļūda.'; return; }
+    let finalUrl;
+
+    if (gMode === 'upload') {
+      if (!gFileBlob) { msg.className='msg err'; msg.textContent='Izvēlies bildi.'; return; }
+
+      // 1. Iegūst upload tokenu no servera (ātra, maza pieprasījums)
+      const safeName = `gallery/${Date.now()}-${gFileInfo.name.replace(/[^a-z0-9.]/gi,'_')}.jpg`;
+      const tokenRes = await fetch('/api/admin/gallery-upload', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify({
+          type: 'blob.generate-client-token',
+          payload: { pathname: safeName, callbackUrl: `${location.origin}/api/admin/gallery-upload`, multipart: false },
+        }),
+      });
+      if (!tokenRes.ok) { const e = await tokenRes.json(); throw new Error(e.error || 'Token kļūda'); }
+      const { clientToken } = await tokenRes.json();
+
+      // 2. Fails iet tieši uz Vercel Blob (neiet caur serveri)
+      msg.textContent = 'Augšupielādē uz Blob…';
+      const uploadRes = await fetch(`https://vercel.com/api/blob/${safeName}`, {
+        method: 'PUT',
+        headers: {
+          'authorization': `Bearer ${clientToken}`,
+          'x-api-version': '12',
+          'content-type': 'image/jpeg',
+          'x-content-length': String(gFileBlob.size),
+        },
+        body: gFileBlob,
+      });
+      if (!uploadRes.ok) { const e = await uploadRes.json().catch(()=>({})); throw new Error(e.error || `Blob kļūda ${uploadRes.status}`); }
+      const blob = await uploadRes.json();
+      finalUrl = blob.url;
+
+      // 3. Saglabā URL datubāzē
+      msg.textContent = 'Saglabā…';
+      const saveRes = await fetch('/api/admin/gallery', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify({ url: finalUrl, label }),
+      });
+      if (!saveRes.ok) { const e = await saveRes.json(); throw new Error(e.error || 'DB kļūda'); }
+
+    } else {
+      const url = document.getElementById('gUrl').value.trim();
+      if (!url) { msg.className='msg err'; msg.textContent='Ievadi bildes saiti.'; return; }
+      const res = await fetch('/api/admin/gallery', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify({ url, label }),
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Kļūda'); }
+    }
+
   } catch (err) {
-    clearTimeout(timeout);
-    msg.className='msg err';
-    msg.textContent = err.name === 'AbortError' ? 'Timeout — bilde pārāk liela vai savienojums lēns.' : `Tīkla kļūda: ${err.message}`;
+    msg.className = 'msg err';
+    msg.textContent = err.message || 'Kļūda';
     return;
   }
 
@@ -933,7 +964,7 @@ async function addGalleryImage() {
   document.getElementById('gFile').value='';
   document.getElementById('gPreviewWrap').style.display='none';
   document.getElementById('gDropZone').style.borderColor='var(--line)';
-  gFileData = null; gFileInfo = null;
+  gFileBlob = null; gFileInfo = null;
   loadGallery();
   setTimeout(()=>msg.textContent='', 3000);
 }
