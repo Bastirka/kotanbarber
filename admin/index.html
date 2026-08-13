@@ -873,13 +873,13 @@ function gFileSelected(input) {
     // Compress via canvas
     const img = new Image();
     img.onload = () => {
-      const MAX = 1400;
+      const MAX = 1200;
       const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
       const canvas = document.createElement('canvas');
       canvas.width = Math.round(img.width * ratio);
       canvas.height = Math.round(img.height * ratio);
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      const compressed = canvas.toDataURL('image/jpeg', 0.85);
+      const compressed = canvas.toDataURL('image/jpeg', 0.78);
       gFileData = compressed.split(',')[1];
       // Preview
       document.getElementById('gPreview').src = compressed;
@@ -907,13 +907,26 @@ async function addGalleryImage() {
     body = { url, label };
   }
 
-  const res = await fetch('/api/admin/gallery', {
-    method:'POST',
-    headers:{'Content-Type':'application/json','X-Admin-Token':token},
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  if (!res.ok) { msg.className='msg err'; msg.textContent=data.error||'Kļūda.'; return; }
+  const ctrl = new AbortController();
+  const timeout = setTimeout(() => ctrl.abort(), 55000);
+
+  try {
+    const res = await fetch('/api/admin/gallery', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Admin-Token':token},
+      body: JSON.stringify(body),
+      signal: ctrl.signal,
+    });
+    clearTimeout(timeout);
+    const data = await res.json();
+    if (!res.ok) { msg.className='msg err'; msg.textContent=data.error||'Kļūda.'; return; }
+  } catch (err) {
+    clearTimeout(timeout);
+    msg.className='msg err';
+    msg.textContent = err.name === 'AbortError' ? 'Timeout — bilde pārāk liela vai savienojums lēns.' : `Tīkla kļūda: ${err.message}`;
+    return;
+  }
+
   msg.className='msg ok'; msg.textContent='✓ Pievienota';
   document.getElementById('gUrl') && (document.getElementById('gUrl').value='');
   document.getElementById('gLabel').value='';
