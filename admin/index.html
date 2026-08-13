@@ -842,7 +842,7 @@ async function loadGallery() {
 }
 
 let gMode = 'upload';
-let gFileBlob = null;
+let gFileData = null;
 let gFileName = null;
 
 function escHtml(value) {
@@ -878,12 +878,10 @@ function gFileSelected(input) {
       canvas.width = Math.round(img.width * ratio);
       canvas.height = Math.round(img.height * ratio);
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      const preview = canvas.toDataURL('image/jpeg', 0.85);
-      document.getElementById('gPreview').src = preview;
-      canvas.toBlob(blob => {
-        gFileBlob = blob;
-        document.getElementById('gFileName').textContent = `${file.name} → ${Math.round(blob.size / 1024)}KB`;
-      }, 'image/jpeg', 0.85);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      gFileData = dataUrl.split(',')[1];
+      document.getElementById('gPreview').src = dataUrl;
+      document.getElementById('gFileName').textContent = `${file.name} → ${Math.round(gFileData.length * 0.75 / 1024)}KB`;
       document.getElementById('gPreviewWrap').style.display = 'block';
       document.getElementById('gDropZone').style.borderColor = 'var(--accent)';
     };
@@ -914,16 +912,15 @@ function addGalleryImage() {
     return;
   }
 
-  if (!gFileBlob) { msg.className='msg err'; msg.textContent='Izvēlies bildi.'; return; }
+  if (!gFileData) { msg.className='msg err'; msg.textContent='Izvēlies bildi.'; return; }
 
   const ext = (gFileName || 'photo.jpg').split('.').pop().replace(/[^a-z0-9]/gi,'') || 'jpg';
-  const fd = new FormData();
-  fd.append('file', gFileBlob, `${Date.now()}.${ext}`);
-  fd.append('label', label);
+  const payload = JSON.stringify({ fileData: gFileData, fileName: `${Date.now()}.${ext}`, fileType: 'image/jpeg', label });
 
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/api/admin/gallery');
   xhr.setRequestHeader('x-admin-token', token);
+  xhr.setRequestHeader('content-type', 'application/json');
 
   xhr.upload.onprogress = e => {
     if (e.lengthComputable) {
@@ -946,7 +943,7 @@ function addGalleryImage() {
     document.getElementById('gFile').value = '';
     document.getElementById('gPreviewWrap').style.display = 'none';
     document.getElementById('gDropZone').style.borderColor = 'var(--line)';
-    gFileBlob = null; gFileName = null;
+    gFileData = null; gFileName = null;
     loadGallery();
     setTimeout(() => msg.textContent = '', 3000);
   };
@@ -956,7 +953,7 @@ function addGalleryImage() {
   xhr.timeout = 55000;
 
   msg.className = 'msg'; msg.textContent = 'Augšupielādē… 0%';
-  xhr.send(fd);
+  xhr.send(payload);
 }
 
 async function deleteGalleryImage(id) {
