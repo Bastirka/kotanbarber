@@ -904,7 +904,8 @@ async function addGalleryImage() {
       if (!gFileBlob) { msg.className='msg err'; msg.textContent='Izvēlies bildi.'; return; }
 
       // 1. Iegūst upload tokenu no servera (ātra, maza pieprasījums)
-      const safeName = `gallery/${Date.now()}-${gFileInfo.name.replace(/[^a-z0-9.]/gi,'_')}.jpg`;
+      const ext = (gFileInfo.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z]/g,'') || 'jpg';
+      const safeName = `gallery/${Date.now()}.${ext}`;
       const tokenRes = await fetch('/api/admin/gallery-upload', {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-admin-token': token },

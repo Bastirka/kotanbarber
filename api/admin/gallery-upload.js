@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
       onBeforeGenerateToken: async () => ({
         allowedContentTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
         maximumSizeInBytes: 15 * 1024 * 1024,
-        addRandomSuffix: true,
+        addRandomSuffix: false,
       }),
       onUploadCompleted: async () => {},
     });
