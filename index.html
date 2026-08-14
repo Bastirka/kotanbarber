@@ -144,8 +144,9 @@ nav{
   display:flex; align-items:center; justify-content:space-between;
   padding:22px 0;
 }
-.brand{ font-family:'Anton',sans-serif; font-size:1.4rem; letter-spacing:1px; text-transform:uppercase; }
-.brand span{ color:var(--accent); }
+.brand{ display:inline-flex; align-items:center; }
+.brand img{ height:36px; width:auto; display:block; }
+.foot .brand img{ height:44px; }
 .nav-links{ display:flex; gap:34px; }
 .nav-links a.btn{ display:none; color:var(--ink); }
 .nav-links a.btn:hover{ color:var(--accent); }
@@ -492,7 +493,7 @@ select.bk-field{ appearance:none; }
 /* FOOTER */
 footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
 .foot{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; }
-.foot .brand{ font-size:1.6rem; }
+.foot .brand{ }
 .foot small{ color:var(--muted); font-size:.8rem; }
 .socials{ display:flex; gap:24px; }
 .socials a{ font-size:.78rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); transition:color .2s; }
@@ -553,7 +554,7 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
 <header id="header">
   <div class="wrap">
     <nav>
-      <a href="#" class="brand">KOTAAANS<span>.</span></a>
+      <a href="#" class="brand"><img src="/images/logo.jpg" alt="Kotāns Barbershop"></a>
       <div class="nav-links" id="navLinks">
         <a href="#par">Par mums</a>
         <a href="#pakalpojumi">Pakalpojumi</a>
@@ -750,7 +751,7 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
 <footer>
   <div class="wrap foot">
     <div>
-      <div class="brand">KOTANS<span style="color:var(--accent)">.</span></div>
+      <div class="brand"><img src="/images/logo.jpg" alt="Kotāns Barbershop"></div>
       <small>© 2026 Kotāns · Rēzekne</small>
     </div>
     <div class="socials">
