@@ -34,11 +34,12 @@ module.exports = async (req, res) => {
       let finalUrl = url;
 
       if (fileData && fileName) {
-        if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        const blobToken = process.env.PUBLIC_BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+        if (!blobToken) {
           return res.status(503).json({ error: 'Blob storage nav iestatīts.' });
         }
         const buffer = Buffer.from(fileData, 'base64');
-        const blob = await put(fileName, buffer, { access: 'public', contentType: fileType || 'image/jpeg', addRandomSuffix: false });
+        const blob = await put(fileName, buffer, { access: 'public', contentType: fileType || 'image/jpeg', addRandomSuffix: false, token: blobToken });
         finalUrl = blob.url;
       }
 
