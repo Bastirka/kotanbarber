@@ -526,17 +526,51 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
   .nav-links a.btn{ display:inline-block; margin-top:10px; }
   .burger{ display:flex; z-index:100; }
   nav > .btn{ display:none; }
-  .about-grid{ grid-template-columns:1fr; gap:40px; }
+  nav{ padding:14px 0; }
+  .about-grid{ grid-template-columns:1fr; gap:36px; }
+  .about-card{ padding:28px 24px; }
   .services{ grid-template-columns:1fr; }
-  .service{ border-right:none; }
-  .gallery{ grid-template-columns:repeat(2,1fr); }
+  .service{ border-right:none; padding:22px 20px; }
+  .gallery{ grid-template-columns:repeat(2,1fr); gap:8px; }
   .gallery .tile.big{ grid-row:auto; }
-  .stats{ gap:30px; }
-  section{ padding:90px 0; }
+  .stats{ gap:24px; flex-wrap:wrap; }
+  section{ padding:70px 0; }
+  .sec-head{ margin-bottom:40px; }
   .hero-media{ grid-template-columns:1fr; }
   .hero-panel:last-child,
   .hero-mark,
   .hero-ghost{ display:none; }
+  .hero-inner{ padding-top:70px; }
+  .hero-logo{ width:min(460px, 82vw); }
+  .hero-cta{ margin-top:28px; }
+  .booking{ padding:24px 20px; }
+  .contact-meta{ gap:28px; margin-top:40px; }
+  .foot{ flex-direction:column; align-items:center; text-align:center; gap:16px; }
+  .socials{ justify-content:center; }
+  footer{ padding:40px 0 60px; }
+}
+
+@media (max-width:480px){
+  section{ padding:56px 0; }
+  .sec-head{ margin-bottom:30px; }
+  .hero-inner{ padding-top:60px; }
+  .hero-logo{ width:min(300px, 88vw); }
+  .hero-cta{ margin-top:22px; gap:12px; }
+  .btn{ padding:14px 22px; font-size:.82rem; }
+  .gallery{ grid-template-columns:1fr 1fr; gap:6px; }
+  .gallery .tile{ aspect-ratio:1/1; }
+  .service{ padding:16px 14px; }
+  .service-info h3{ font-size:1.25rem; }
+  .service-price{ font-size:1.5rem; }
+  .booking{ padding:18px 14px; border-left:none; border-right:none; border-radius:0; max-width:100%; }
+  .bk-row .btn{ min-width:0; padding:13px 14px; font-size:.78rem; }
+  .stats{ gap:16px; }
+  .stat .num{ font-size:2.4rem; }
+  .about-card{ padding:22px 18px; }
+  .about-card h3{ font-size:1.6rem; }
+  .marquee span{ font-size:1.2rem; margin:0 16px; }
+  .contact-row{ gap:10px; }
+  .contact-meta{ flex-direction:column; align-items:center; gap:20px; }
 }
 </style>
 </head>
