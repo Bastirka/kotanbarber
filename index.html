@@ -255,11 +255,9 @@ nav{
 }
 .eyebrow::before{ content:""; width:42px; height:1px; background:var(--accent); }
 
-.hero h1{
-  font-size:clamp(3.5rem, 13vw, 12rem);
-  letter-spacing:-2px;
-}
+.hero h1{ font-size:clamp(3.5rem, 13vw, 12rem); letter-spacing:-2px; }
 .hero h1 em{ color:var(--accent); font-style:normal; }
+.hero-logo{ width:clamp(280px, 55vw, 780px); height:auto; display:block; }
 .hero-cta{ display:flex; gap:16px; flex-wrap:wrap; margin-top:38px; }
 
 /* ============ MARQUEE ============ */
@@ -578,7 +576,7 @@ footer{ border-top:1px solid var(--line); padding:50px 0 70px; }
   <div class="hero-mark">KOT<span>A</span>NS</div>
   <div class="wrap hero-inner">
     <span class="eyebrow">Barbershop · Rēzekne, Latvija</span>
-    <h1>Kotāns.</h1>
+    <h1><img src="/images/logo.png" alt="Kotāns" class="hero-logo"></h1>
     <div class="hero-cta">
       <a href="#rezervet" class="btn btn-accent">Pieraksties</a>
     </div>
