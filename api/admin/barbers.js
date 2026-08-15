@@ -5,6 +5,9 @@ function checkAuth(req) {
   return token && req.headers['x-admin-token'] === token;
 }
 
+const HEX_COLOR = /^#[0-9a-fA-F]{3,8}$/;
+function safeColor(c) { return HEX_COLOR.test(c || '') ? c : '#d92b3a'; }
+
 module.exports = async (req, res) => {
   if (!checkAuth(req)) { res.status(401).json({ error: 'Unauthorized' }); return; }
 
@@ -21,7 +24,7 @@ module.exports = async (req, res) => {
     if (!name) return res.status(400).json({ error: 'name required' });
     const { rows } = await query(
       'INSERT INTO barbers (name, telegram_chat_id, color) VALUES ($1, $2, $3) RETURNING *',
-      [name.trim(), telegram_chat_id || null, color || '#d92b3a']
+      [name.trim(), telegram_chat_id || null, safeColor(color)]
     );
     return res.status(201).json({ barber: rows[0] });
   }
@@ -37,7 +40,7 @@ module.exports = async (req, res) => {
         active           = COALESCE($3, active),
         color            = COALESCE($4, color)
        WHERE id = $5 RETURNING *`,
-      [name || null, telegram_chat_id !== undefined ? (telegram_chat_id || null) : null, active !== undefined ? active : null, color || null, id]
+      [name || null, telegram_chat_id !== undefined ? (telegram_chat_id || null) : null, active !== undefined ? active : null, color ? safeColor(color) : null, id]
     );
     return res.status(200).json({ barber: rows[0] });
   }

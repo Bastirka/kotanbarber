@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   }
 
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
-  if (secret && req.headers['x-telegram-bot-api-secret-token'] !== secret) {
+  if (!secret || req.headers['x-telegram-bot-api-secret-token'] !== secret) {
     res.status(401).send('Unauthorized');
     return;
   }

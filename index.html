@@ -818,6 +818,10 @@ navLinks.querySelectorAll('a').forEach(a =>
   })
 );
 
+function escHtml(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 /* ====== Scroll reveal animācija ====== */
 // Kad navigē ar hash linku — uzreiz parāda mērķa sadaļas reveal elementus
 function revealSection(hash) {
@@ -939,7 +943,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'bk-service';
-      btn.innerHTML = `<div class="nm">${s.name}</div><div class="price">€${s.priceEur}</div><div class="dur">${s.durationMin} min</div>`;
+      btn.innerHTML = `<div class="nm">${escHtml(s.name)}</div><div class="price">€${s.priceEur}</div><div class="dur">${s.durationMin} min</div>`;
       btn.addEventListener('click', () => selectService(s, btn));
       els.services.appendChild(btn);
     });
@@ -961,7 +965,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       const data = await res.json();
       if (!res.ok || !data.slot) throw new Error('no slot');
       state.startsAtIso = data.slot;
-      els.summary.innerHTML = `<strong>${state.service.name}</strong> · €${state.service.priceEur}<br>${fmtDayTime(data.slot)}`;
+      els.summary.innerHTML = `<strong>${escHtml(state.service.name)}</strong> · €${state.service.priceEur}<br>${fmtDayTime(data.slot)}`;
       showStep('details');
     } catch {
       showError('Rezervāciju sistēma īslaicīgi nav pieejama. Pamēģini vēlreiz vai zvani +371 24118068.');
@@ -1043,7 +1047,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         }
         return;
       }
-      els.done.innerHTML = `<div class="check">✓</div><h3>Pierakstīts!</h3><p><strong>${data.appointment.serviceName}</strong> · €${data.appointment.priceEur}</p><p>${fmtDayTime(data.appointment.startsAt)}</p><p style="margin-top:16px;">Gaidīsim tevi Kotānā, Rēzeknē.</p>`;
+      els.done.innerHTML = `<div class="check">✓</div><h3>Pierakstīts!</h3><p><strong>${escHtml(data.appointment.serviceName)}</strong> · €${data.appointment.priceEur}</p><p>${fmtDayTime(data.appointment.startsAt)}</p><p style="margin-top:16px;">Gaidīsim tevi Kotānā, Rēzeknē.</p>`;
       showStep('done');
     } catch {
       showError('Rezervāciju sistēma īslaicīgi nav pieejama. Pamēģini vēlreiz vai zvani +371 24118068.');

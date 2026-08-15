@@ -486,14 +486,14 @@ function renderAppts(list) {
   const srcBadge = { queue:'badge-q', scheduled:'badge-s', web:'badge-w', manual:'badge-m', telegram:'badge-q' };
   const srcLabel = { queue:'rinda', scheduled:'grafiks', web:'lapa', manual:'manuāls', telegram:'tg' };
 
-  const barberOptions = allBarbers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+  const barberOptions = allBarbers.map(b => `<option value="${b.id}">${escHtml(b.name)}</option>`).join('');
 
   el.innerHTML = list.map(a => {
     const src = a.source || a.mode;
     const price = a.final_price_eur ? `€${parseFloat(a.final_price_eur).toFixed(0)}` : `€${a.price_eur}`;
-    const phone = a.phone ? ` · ${a.phone}` : '';
-    const tg    = a.telegram_username ? ` · @${a.telegram_username}` : '';
-    const barberLabel = a.barber_name ? `<div class="appt-barber">▶ ${a.barber_name}</div>` : '<div class="appt-barber" style="color:var(--muted)">— nav piešķirts —</div>';
+    const phone = a.phone ? ` · ${escHtml(a.phone)}` : '';
+    const tg    = a.telegram_username ? ` · @${escHtml(a.telegram_username)}` : '';
+    const barberLabel = a.barber_name ? `<div class="appt-barber">▶ ${escHtml(a.barber_name)}</div>` : '<div class="appt-barber" style="color:var(--muted)">— nav piešķirts —</div>';
     return `
     <div class="appt-card">
       <div class="appt-time">
@@ -501,8 +501,8 @@ function renderAppts(list) {
         <div class="date">${fmtD(a.starts_at)}</div>
       </div>
       <div class="appt-info">
-        <div class="appt-service">${a.service_name} <span class="badge ${srcBadge[src]||'badge-m'}">${srcLabel[src]||src}</span></div>
-        <div class="appt-client">${a.client_name}${phone}${tg} · ${price}</div>
+        <div class="appt-service">${escHtml(a.service_name)} <span class="badge ${srcBadge[src]||'badge-m'}">${srcLabel[src]||src}</span></div>
+        <div class="appt-client">${escHtml(a.client_name)}${phone}${tg} · ${price}</div>
         ${barberLabel}
       </div>
       <div class="appt-actions">
@@ -539,7 +539,7 @@ async function cancelAppt(id) {
 async function loadServicesForForm() {
   const res = await fetch('/api/services');
   const { services } = await res.json();
-  document.getElementById('addService').innerHTML = services.map(s => `<option value="${s.id}">${s.name} · ${s.durationMin}min · €${s.priceEur}</option>`).join('');
+  document.getElementById('addService').innerHTML = services.map(s => `<option value="${s.id}">${escHtml(s.name)} · ${s.durationMin}min · €${s.priceEur}</option>`).join('');
 }
 
 document.getElementById('addForm').addEventListener('submit', async ev => {
@@ -594,7 +594,7 @@ async function loadBarbers() {
   allBarbers = barbers;
   renderBarbers(barbers);
   // Update barber selects
-  const opts = '<option value="">— Automātiski —</option>' + barbers.filter(b=>b.active).map(b=>`<option value="${b.id}">${b.name}</option>`).join('');
+  const opts = '<option value="">— Automātiski —</option>' + barbers.filter(b=>b.active).map(b=>`<option value="${b.id}">${escHtml(b.name)}</option>`).join('');
   document.getElementById('addBarber').innerHTML = opts;
 }
 
@@ -604,8 +604,8 @@ function renderBarbers(list) {
   el.innerHTML = list.map(b => `
     <div class="card" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-left:4px solid ${b.color||'#d92b3a'};">
       <div style="flex:1;min-width:120px;">
-        <div style="font-weight:700;">${b.name} ${b.active?'':'<span style="color:var(--muted);font-weight:400;">(neaktīvs)</span>'}</div>
-        <div style="font-size:.82rem;color:var(--muted);margin-top:3px;">Telegram: ${b.telegram_chat_id||'—'}</div>
+        <div style="font-weight:700;">${escHtml(b.name)} ${b.active?'':'<span style="color:var(--muted);font-weight:400;">(neaktīvs)</span>'}</div>
+        <div style="font-size:.82rem;color:var(--muted);margin-top:3px;">Telegram: ${escHtml(String(b.telegram_chat_id||'—'))}</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <div style="display:flex;flex-direction:column;gap:3px;">
@@ -688,7 +688,7 @@ async function loadServicesTable() {
   const tbody = document.getElementById('servicesTbody');
   tbody.innerHTML = services.map(s => `
     <tr>
-      <td>${s.name}</td>
+      <td>${escHtml(s.name)}</td>
       <td><input class="price-inp" type="number" id="sp_${s.id}" value="${s.price_eur}" min="1" max="999"></td>
       <td><input class="dur-inp" type="number" id="sd_${s.id}" value="${s.duration_min}" min="5" max="240"></td>
       <td style="display:flex;gap:6px;">
@@ -701,7 +701,7 @@ async function loadServicesTable() {
   const cards = document.getElementById('svcCards');
   cards.innerHTML = services.map(s => `
     <div class="svc-card">
-      <div class="svc-card-name">${s.name}</div>
+      <div class="svc-card-name">${escHtml(s.name)}</div>
       <div class="svc-card-row">
         <div class="svc-card-field">
           <span class="lbl">Cena (€)</span>
@@ -1012,7 +1012,7 @@ async function renderCal() {
   // Update legend with barber colors
   const legend = document.getElementById('calLegend');
   const barberDots = allBarbers.filter(b=>b.active).map(b=>
-    `<span><div class="dot" style="background:${b.color||'#d92b3a'};"></div> ${b.name}</span>`
+    `<span><div class="dot" style="background:${escHtml(b.color||'#d92b3a')};"></div> ${escHtml(b.name)}</span>`
   ).join('');
   legend.innerHTML = barberDots + `<span><div class="dot" style="background:#f0f0f0;border:1px solid #e0e0e0;"></div> Brīvs</span>`;
 
@@ -1069,13 +1069,13 @@ async function renderCal() {
       const fmtTime = iso => new Intl.DateTimeFormat('lv-LV',{timeZone:'Europe/Riga',hour:'2-digit',minute:'2-digit'}).format(new Date(iso));
       const barber = allBarbers.find(b => b.id === appt.barber_id);
       const color = barber ? barber.color : '#d92b3a';
-      const barberName = barber ? ` · ${barber.name}` : '';
+      const barberName = barber ? ` · ${escHtml(barber.name)}` : '';
       slotsHtml += `
         <div style="height:${span*SLOT_PX}px;position:relative;border-bottom:1px solid var(--line);">
-          <div style="position:absolute;inset:3px;background:${color};border-radius:6px;padding:5px 8px;color:#fff;overflow:hidden;box-shadow:0 2px 6px ${color}44;">
+          <div style="position:absolute;inset:3px;background:${escHtml(color)};border-radius:6px;padding:5px 8px;color:#fff;overflow:hidden;box-shadow:0 2px 6px ${escHtml(color)}44;">
             <div style="font-weight:700;font-size:.8rem;">${fmtTime(appt.starts_at)}–${fmtTime(appt.ends_at)}${barberName}</div>
-            <div style="font-size:.75rem;opacity:.95;">${appt.service_name}</div>
-            <div style="font-size:.72rem;opacity:.8;">${appt.client_name}${appt.phone?' · '+appt.phone:''}</div>
+            <div style="font-size:.75rem;opacity:.95;">${escHtml(appt.service_name)}</div>
+            <div style="font-size:.72rem;opacity:.8;">${escHtml(appt.client_name)}${appt.phone?' · '+escHtml(appt.phone):''}</div>
           </div>
         </div>`;
     } else {
