@@ -141,20 +141,26 @@
   }
 
   /* GALERIJA */
-  .gal-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
-  .gal-item{ background:var(--white); border-radius:var(--r); overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.08); }
-  .gal-img{ width:100%; height:140px; object-fit:cover; background:#f0f0f0; display:block; }
-  .gal-img-placeholder{ width:100%; height:140px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; font-size:2rem; color:#ccc; }
-  .gal-info{ padding:10px 12px; }
-  .gal-label{ font-size:.85rem; font-weight:600; margin-bottom:4px; }
-  .gal-url{ font-size:.72rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:8px; }
-  .gal-meta{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+  .gal-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; }
+  .gal-item{ background:var(--white); border-radius:var(--r); overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.08); display:flex; flex-direction:column; }
+  .gal-img{ width:100%; height:160px; object-fit:cover; background:#f0f0f0; display:block; }
+  .gal-img-placeholder{ width:100%; height:160px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; font-size:2rem; color:#ccc; }
+  .gal-info{ padding:12px; flex:1; display:flex; flex-direction:column; gap:8px; }
+  .gal-label{ font-size:.85rem; font-weight:600; }
+  .gal-url{ font-size:.72rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .gal-meta{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
   .gal-sort{ display:flex; align-items:center; gap:6px; font-size:.76rem; color:var(--muted); }
-  .gal-sort input{ width:68px; }
+  .gal-sort input{ width:60px; }
   .gal-toggle{ display:flex; align-items:center; gap:6px; font-size:.76rem; color:var(--muted); }
-  .gal-btns{ display:flex; gap:6px; }
-  .gal-btns button{ flex:1; }
-  @media(max-width:600px){ .gal-grid{ grid-template-columns:repeat(2,1fr); } }
+  .gal-btns{ display:flex; flex-direction:column; gap:6px; margin-top:auto; }
+  .gal-btns button{ width:100%; padding:10px; font-size:.82rem; }
+  .gal-btn-del{ background:#fee2e2 !important; color:#b91c1c !important; border:0 !important; font-weight:700; }
+  @media(max-width:600px){
+    .gal-grid{ grid-template-columns:1fr; }
+    .gal-img{ height:200px; }
+    .gal-btns{ flex-direction:row; }
+    .gal-btns button{ flex:1; }
+  }
 
   /* GRAFIKS */
   .cal-nav{ display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
@@ -834,8 +840,7 @@ async function loadGallery() {
         </div>
         <div class="gal-btns">
           <button class="btn-sm btn-ghost" onclick="saveGalleryImage(${img.id})">Saglabāt</button>
-          <button class="btn-sm btn-ghost" onclick="editGalleryLabel(${img.id}, ${JSON.stringify(img.label || '').replace(/&/g,'&amp;').replace(/\"/g,'&quot;')})">Apraksts</button>
-          <button class="btn-sm" style="background:#fee2e2;color:#b91c1c;border:0;" onclick="deleteGalleryImage(${img.id})">Dzēst</button>
+          <button class="btn-sm gal-btn-del" onclick="deleteGalleryImage(${img.id})">🗑 Dzēst</button>
         </div>
       </div>
     </div>`).join('')}</div>`;
