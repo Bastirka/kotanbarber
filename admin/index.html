@@ -628,7 +628,10 @@ function renderBarbers(list) {
             <button class="btn-sm btn-ghost" onclick="updateBarberTg(${b.id})">✓</button>
           </div>
         </div>
-        <button class="btn-sm" style="background:${b.active?'#f3f4f6':'#f0fdf4'};color:${b.active?'#374151':'#15803d'};border:0;align-self:flex-end;" onclick="toggleBarberActive(${b.id}, ${!b.active})">${b.active?'Deaktivēt':'Aktivēt'}</button>
+        <div style="display:flex;gap:6px;align-self:flex-end;">
+          <button class="btn-sm" style="background:${b.active?'#f3f4f6':'#f0fdf4'};color:${b.active?'#374151':'#15803d'};border:0;" onclick="toggleBarberActive(${b.id}, ${!b.active})">${b.active?'Deaktivēt':'Aktivēt'}</button>
+          <button class="btn-sm" style="background:#fee2e2;color:#b91c1c;border:0;font-weight:700;" onclick="deleteBarber(${b.id}, '${escHtml(b.name)}')">🗑 Dzēst</button>
+        </div>
       </div>
     </div>`).join('');
 }
@@ -676,6 +679,17 @@ async function toggleBarberActive(id, active) {
     headers:{'Content-Type':'application/json','X-Admin-Token':token},
     body: JSON.stringify({ active }),
   });
+  loadBarbers();
+}
+
+async function deleteBarber(id, name) {
+  if (!confirm(`Dzēst meistaru "${name}"? Ja viņam ir pieraksti, tie netiks dzēsti.`)) return;
+  const res = await fetch(`/api/admin/barbers?id=${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Token': token },
+  });
+  const data = await res.json();
+  if (!res.ok) { alert(data.error || 'Kļūda dzēšot'); return; }
   loadBarbers();
 }
 

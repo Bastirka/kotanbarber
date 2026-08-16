@@ -48,7 +48,14 @@ module.exports = async (req, res) => {
   if (req.method === 'DELETE') {
     const id = Number(req.query.id);
     if (!id) return res.status(400).json({ error: 'id required' });
-    await query('UPDATE barbers SET active = false WHERE id = $1', [id]);
+    const { rows } = await query(
+      `SELECT COUNT(*) AS cnt FROM appointments WHERE barber_id = $1 AND status = 'confirmed' AND starts_at > now()`,
+      [id]
+    );
+    if (Number(rows[0].cnt) > 0) {
+      return res.status(409).json({ error: 'Meistaram ir aktīvi pieraksti — vispirms atcel tos.' });
+    }
+    await query('DELETE FROM barbers WHERE id = $1', [id]);
     return res.status(200).json({ ok: true });
   }
 
